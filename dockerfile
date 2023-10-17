@@ -4,7 +4,7 @@ WORKDIR /root
 
 COPY package*.json ./
 # Download dependancies
-RUN npm install mime-types express cookie-parser
+RUN npm install
 COPY . .
 EXPOSE 8080
-CMD ["node", "index.js"]
+CMD ["npx","nodemon", "index.js"]
