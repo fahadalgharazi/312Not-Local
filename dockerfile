@@ -4,7 +4,8 @@ WORKDIR /root
 
 COPY package*.json ./
 # Download dependancies
-RUN npm install
+RUN npm install 
 COPY . .
 EXPOSE 8080
-CMD ["npx","nodemon", "index.js"]
+CMD ["node", "index.js"] 
+# "npx","nodemon", 

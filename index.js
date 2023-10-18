@@ -4,6 +4,9 @@ const port = 8000
 const mime = require('mime-types');
 const path = require('path')
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');  
+
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const setHeaders = function (req, res, next) {
     const filePath = path.join(__dirname, 'public', req.path);
@@ -35,6 +38,12 @@ app.get('/', (req, res) => {
     const filePath = path.join(__dirname, 'public', req.path);
     res.sendFile(filePath);
 })
+
+app.post('/make-post', (req, res) => {  
+    // Do some DB stuff in here
+    res.send("POST Request Called")
+ })  
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
