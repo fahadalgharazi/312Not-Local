@@ -6,7 +6,7 @@ const mime = require("mime-types");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongo = require("mongoose");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
@@ -15,7 +15,6 @@ mongo.connect("mongodb://mongo:27017/312Not-Local", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-const user_collection = mongo.Collection("Users");
 
 // creates schema object
 const Schema = mongo.Schema;
@@ -30,12 +29,11 @@ const user_schema = new Schema({
   password: String,
 });
 
+// creates a model, which is basically db["User"]
+const User = mongo.model("User", user_schema);
 // DATABASE CRUD
 async function add_new_user(username, password, email) {
   // async and await allow other processes to run while this is running
-  // creates a model, which is basically db["User"]
-  const User = mongoose.model("Users", user_schema);
-
   // create a new document for user
   const new_user = new User({
     name: username,
@@ -97,6 +95,7 @@ app.get("/", (req, res) => {
 // posts
 app.post("/register", (req, res) => {
   // check if username exists
+  //const user_doc = user_collection.findOne()
   console.log("Registering!");
 });
 // running the app
