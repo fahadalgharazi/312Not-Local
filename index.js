@@ -1,13 +1,15 @@
 // dependencies
 const express = require("express");
 const app = express();
-const port = 8000;
 const mime = require("mime-types");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
+
+//port
+const port = 8000;
 
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
@@ -64,7 +66,7 @@ async function verify_user(username, password) {
   try {
     const fetched_data = await User.findOne({ name: username });
     if (fetched_data) {
-      const is_match = bcrypt.compare(password, fetched_data.password);
+      const is_match = await bcrypt.compare(password, fetched_data.password); // returns a promise, await is needed for bool val
       if (is_match) {
         // this block of code checks if passwords match, if yes, send an auth token to client
         const metadata = {
@@ -79,7 +81,7 @@ async function verify_user(username, password) {
           auth_key: auth_token,
         });
         await auth_entry.save(); // save info into database
-        return [auth_token]; // return as type list, to differentiate return values
+        return auth_token;
       } else {
         return "Invalid password!";
       }
@@ -87,7 +89,7 @@ async function verify_user(username, password) {
       return "User not found!";
     }
   } catch (error) {
-    // catch whatever error for debugging
+    // catch whatever error for debuggings
     console.error(error);
     return "An error occurred while verifying the user.";
   }
@@ -129,7 +131,6 @@ app.get("/", (req, res) => {
 
 // posts
 app.post("/register", async (req, res) => {
-  // Made the callback async
   const name = req.body.username_reg;
   const password = req.body.password_reg;
   console.log(req.body);
@@ -148,6 +149,28 @@ app.post("/register", async (req, res) => {
     res.status(500).send("A server error has occurred: " + String(error));
   }
 });
+
+app.post("/login", async (req, res) => {
+  const user_login = req.body.username_login;
+  const pass_login = req.body.password_login;
+  const user_verification = await verify_user(user_login, pass_login);
+  console.log(user_verification);
+  if (
+    user_verification !== "User not found!" &&
+    user_verification !== "Invalid password!"
+  ) {
+    res
+      .cookie("token_cookie", user_verification, {
+        maxAge: 3600000, // one hr in ms
+        httpOnly: true,
+        sameSite: "strict", // no cross-site cookie viewing
+      })
+      .send("Login successful!\n" + "Logged in: " + user_login);
+  } else {
+    res.status(401).send(user_verification);
+  }
+});
+
 // running the app
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
