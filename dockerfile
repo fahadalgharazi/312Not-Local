@@ -5,6 +5,8 @@ WORKDIR /root
 COPY package*.json ./
 # Download dependancies
 RUN npm install
+RUN npm install -g nodemon
+
 COPY . .
 EXPOSE 8080
-CMD ["node", "index.js"]
+CMD ["nodemon", "index.js"]

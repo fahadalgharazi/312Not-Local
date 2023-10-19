@@ -7,6 +7,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
@@ -28,19 +29,26 @@ const user_schema = new Schema({
   email: String,
   password: String,
 });
-
-// creates a model, which is basically db["User"]
-const User = mongo.model("User", user_schema);
+const auth_schema = new Schema({
+  auth_key: String,
+  creation_date: {
+    type: Date,
+    default: Date.now,
+  },
+  username: String,
+});
+// creates a model, which is basically db["users"]
+const User = mongo.model("users", user_schema);
+const Auth = mongo.model("Auth", auth_schema);
 // DATABASE CRUD
-async function add_new_user(username, password, email) {
+async function add_new_user(username, password) {
   // async and await allow other processes to run while this is running
   // create a new document for user
   const new_user = new User({
     name: username,
-    email: email,
+    //email: email,
     password: password,
   });
-
   // hash pw
   new_user.password = await bcrypt.hash(password, 10);
 
@@ -49,14 +57,39 @@ async function add_new_user(username, password, email) {
     .save() // can use save() or insertOne() but save() is more convenient
     .then(() => console.log("User saved: ", new_user["name"]))
     .catch((error) => console.error(error));
+  console.log("Registering: ", username);
 }
 
 async function verify_user(username, password) {
-  const fetched_data = user_collection.findOne({ name: username });
-  if (fetched_data) {
-    // if not none check if hashes of passwords match
-  } else {
-    res.send();
+  try {
+    const fetched_data = await User.findOne({ name: username });
+    if (fetched_data) {
+      const is_match = bcrypt.compare(password, fetched_data.password);
+      if (is_match) {
+        // this block of code checks if passwords match, if yes, send an auth token to client
+        const metadata = {
+          // metadata about token
+          type: "user",
+          name: username,
+        };
+        const secret_key = "secret_key_to_sign_for_jwt";
+        const auth_token = jwt.sign(metadata, secret_key, { expiresIn: "1h" });
+        const auth_entry = new Auth({
+          username: username,
+          auth_key: auth_token,
+        });
+        await auth_entry.save(); // save info into database
+        return [auth_token]; // return as type list, to differentiate return values
+      } else {
+        return "Invalid password!";
+      }
+    } else {
+      return "User not found!";
+    }
+  } catch (error) {
+    // catch whatever error for debugging
+    console.error(error);
+    return "An error occurred while verifying the user.";
   }
 }
 
@@ -73,6 +106,8 @@ const setHeaders = function (req, res, next) {
 app.use(setHeaders);
 app.use(cookieParser());
 app.use("/public", express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // http requests
 app.get("/visit-counter", (req, res) => {
@@ -86,17 +121,32 @@ app.get("/visit-counter", (req, res) => {
   }
   res.sendFile(path.join(__dirname, "public", "visit-counter.html"));
 });
-
+//gets
 app.get("/", (req, res) => {
   const filePath = path.join(__dirname, "public", req.path);
   res.sendFile(filePath);
 });
 
 // posts
-app.post("/register", (req, res) => {
-  // check if username exists
-  //const user_doc = user_collection.findOne()
-  console.log("Registering!");
+app.post("/register", async (req, res) => {
+  // Made the callback async
+  const name = req.body.username_reg;
+  const password = req.body.password_reg;
+  console.log(req.body);
+  if (!name || !password) {
+    return res.status(400).send("All fields are required!");
+  }
+  try {
+    const user_document = await User.findOne({ name: name }); // await the database fetch
+    if (user_document) {
+      return res.status(400).send("Username already exists!"); // if user exists, throw this err
+    }
+    await add_new_user(name, password); // idk if await should be there
+    res.send("User registered successfully!");
+  } catch (error) {
+    console.error("Error occurred:", error); // log error for debugging
+    res.status(500).send("A server error has occurred: " + String(error));
+  }
 });
 // running the app
 app.listen(port, () => {
