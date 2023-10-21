@@ -9,14 +9,6 @@ function cookie_fetch(name) {
   return null;
 }
 
-function simpleButton() {
-  var prophecy = "";
-  if (confirm("Choose the Prophecy")) {
-    prophecy = "He was the Chosen One";
-  }
-  document.getElementById("paragraph").innerHTML = prophecy;
-}
-
 function cookie() {
   visit = document.cookie;
   visVal = 0;

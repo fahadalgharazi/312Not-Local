@@ -87,6 +87,23 @@ async function add_new_user(username, password) {
     .catch((error) => console.error(error));
 }
 
+async function add_new_user(username, title, description) {
+  // async and await allow other processes to run while this is running
+  // create a new document for post
+  const esc_title = escapeHTML(title);
+  const esc_desc = escapeHTML(description);
+  const new_post = new Post({
+    user: username,
+    title: esc_title,
+    description: esc_desc,
+  });
+  // save it to database
+  await new_post
+    .save() // can use save() or insertOne() but save() is more convenient
+    .then(() => console.log("Post Made: ", new_post["user"]))
+    .catch((error) => console.error(error));
+}
+
 async function verify_user(username, password) {
   const esc_user = escapeHTML(username);
   try {
@@ -146,6 +163,7 @@ app.use(cookieParser());
 app.use("/public", express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json())
 
 // http requests
 app.get("/visit-counter", (req, res) => {
@@ -227,7 +245,7 @@ app.post('/make-post', bodyParser.json(), (req, res) => {
     title = "my first post"
     description = "hi guys"
     // Do some DB stuff in here
-    //add_new_post("Billy23", title, description)
+    add_new_post("Billy23", title, description)
     res.send("New POST Made")
  })  
 
