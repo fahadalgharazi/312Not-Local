@@ -1,3 +1,14 @@
+function cookie_fetch(name) {
+  let cookies = document.cookie.split("; "); // doc cookie returns {cookiename=cookie; cookiename2=cookie2; ...}
+  for (let cookie of cookies) {
+    let sc = cookie.split("=");
+    if (sc[0].startsWith(name)) {
+      return sc[1];
+    }
+  }
+  return null;
+}
+
 function simpleButton() {
   var prophecy = "";
   if (confirm("Choose the Prophecy")) {
@@ -20,29 +31,9 @@ function cookie() {
 }
 
 function display_username() {
-  const display = document.getElementsByClassName("display_name");
-  const cookies = document.cookie;
-  const split_cookies = cookies.split(";");
-  const token_exists = split_cookies.some((cookie) =>
-    cookie.startsWith("token_cookie")
-  ); // returns true c meets the condition
-  if (token_exists) {
-    console.log(token_exists);
-    fetch("localhost:8080/user_check")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-      })
-      .then((data) => {
-        console.log("Data:" + data);
-        display.innerText = display.innerText + String(data);
-      })
-      .catch((error) => {
-        console.error(
-          "There has been a problem with your fetch operation:",
-          error
-        );
-      });
+  const display = document.getElementById("display_name");
+  let username = cookie_fetch("username");
+  if (username) {
+    display.innerHTML = display.innerText + `<strong> ${username} </strong>`;
   }
 }

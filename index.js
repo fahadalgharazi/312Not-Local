@@ -176,7 +176,7 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const user_login = req.body.username_login;
+  const user_login = escapeHTML(req.body.username_login);
   const pass_login = req.body.password_login;
   const user_verification = await verify_user(user_login, pass_login);
   console.log(user_verification);
@@ -189,6 +189,11 @@ app.post("/login", async (req, res) => {
         maxAge: 3600000, // one hr in ms
         httpOnly: true,
         sameSite: "strict", // no cross-site cookie viewing
+      })
+      .cookie("username", user_login, {
+        // dont set httponly, so it is readable by the client
+        maxAge: 3600000, // one hour in milliseconds
+        sameSite: "strict",
       })
       .send("Login successful!\n" + "Logged in: " + user_login);
   } else {
