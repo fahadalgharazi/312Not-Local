@@ -87,7 +87,7 @@ async function add_new_user(username, password) {
     .catch((error) => console.error(error));
 }
 
-async function add_new_user(username, title, description) {
+async function add_new_post(username, title, description) {
   // async and await allow other processes to run while this is running
   // create a new document for post
   const esc_title = escapeHTML(title);
@@ -147,7 +147,10 @@ async function token_checker(token) {
     return "";
   }
 }
-
+async function getAllPosts(){
+  const posts = Post.find({})
+  console.log(posts)
+}
 // middlewares
 const setHeaders = function (req, res, next) {
   const filePath = path.join(__dirname, "public", req.path);
@@ -166,6 +169,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 
 // http requests
+app.get("/update-feed"), (req,res) => {
+  console.log("hi")
+  posts = getAllPosts()
+  res.send()
+}
+
 app.get("/visit-counter", (req, res) => {
   if (req.headers.cookie == undefined) {
     res.cookie("Visits", 1, { maxAge: 360000 });
@@ -184,7 +193,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/user_check", (req, res) => {
-  const token_cookie = req.cookies("token_cookie");
+  const token_cookie = req.cookies["token_cookie"];
   res.send(token_checker(token_cookie));
 });
 
@@ -242,10 +251,12 @@ app.get('/', (req, res) => {
 
 app.post('/make-post', bodyParser.json(), (req, res) => { 
     console.log(req.body['title'])
-    title = "my first post"
-    description = "hi guys"
-    // Do some DB stuff in here
-    add_new_post("Billy23", title, description)
+    title = req.body['title']
+    description = req.body['description']
+    token_cookie = req.cookies["username"];
+    if (token_cookie) {
+      add_new_post(token_cookie, title, description)
+    }
     res.send("New POST Made")
  })  
 

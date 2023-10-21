@@ -23,9 +23,9 @@ function cookie() {
 }
 
 function chatMessageHTML(messageJSON) {
-    const username = messageJSON.username;
-    const message = messageJSON.message;
-    const messageId = messageJSON.id;
+    const username = messageJSON.user;
+    const message = messageJSON.title;
+    const messageId = messageJSON.description;
     console.log(messageId)
     let messageHTML = "<br><button onclick='deleteMessage(\"" + messageId + "\")'>X</button> ";
     messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
@@ -33,12 +33,12 @@ function chatMessageHTML(messageJSON) {
 }
 
 function clearChat() {
-    const chatMessages = document.getElementById("chat-messages");
+    const chatMessages = document.getElementById("feed");
     chatMessages.innerHTML = "";
 }
 
 function addMessageToChat(messageJSON) {
-    const chatMessages = document.getElementById("chat-messages");
+    const chatMessages = document.getElementById("feed");
     chatMessages.innerHTML += chatMessageHTML(messageJSON);
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
@@ -73,12 +73,13 @@ function updateFeed() {
         if (this.readyState === 4 && this.status === 200) {
             clearChat();
             const messages = JSON.parse(this.response);
+            console.log(messages)
             for (const message of messages) {
                 addMessageToChat(message);
             }
         }
     }
-    request.open("GET", "/chat-history");
+    request.open("GET", "/update-feed");
     request.send();
 }
 
@@ -104,4 +105,15 @@ function display_username() {
   if (username) {
     display.innerHTML = display.innerText + `<strong> ${username} </strong>`;
   }
+  document.addEventListener("keypress", function (event) {
+    if (event.code === "Enter") {
+        makePost();
+        }
+    });
+
+    document.getElementById("title-text-box").focus();
+    document.getElementById("description-text-box").focus();
+
+    updateFeed();
+    setInterval(updateFeed, 2000);
 }
