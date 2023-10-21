@@ -42,12 +42,22 @@ const auth_schema = new Schema({
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
 const Auth = mongo.model("Auth", auth_schema);
+//
+function escapeHTML(unsafeText) {
+  return unsafeText
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 // DATABASE CRUD
 async function add_new_user(username, password) {
   // async and await allow other processes to run while this is running
   // create a new document for user
+  const esc_user = escapeHTML(username);
   const new_user = new User({
-    name: username,
+    name: esc_user,
     //email: email,
     password: password,
   });
@@ -59,12 +69,13 @@ async function add_new_user(username, password) {
     .save() // can use save() or insertOne() but save() is more convenient
     .then(() => console.log("User saved: ", new_user["name"]))
     .catch((error) => console.error(error));
-  console.log("Registering: ", username);
+  console.log("Registering: ", esc_user);
 }
 
 async function verify_user(username, password) {
+  const esc_user = escapeHTML(username);
   try {
-    const fetched_data = await User.findOne({ name: username });
+    const fetched_data = await User.findOne({ name: esc_user });
     if (fetched_data) {
       const is_match = await bcrypt.compare(password, fetched_data.password); // returns a promise, await is needed for bool val
       if (is_match) {
@@ -72,12 +83,12 @@ async function verify_user(username, password) {
         const metadata = {
           // metadata about token
           type: "user",
-          name: username,
+          name: esc_user,
         };
         const secret_key = "secret_key_to_sign_for_jwt";
         const auth_token = jwt.sign(metadata, secret_key, { expiresIn: "1h" });
         const auth_entry = new Auth({
-          username: username,
+          username: esc_user,
           auth_key: auth_token,
         });
         await auth_entry.save(); // save info into database
@@ -92,6 +103,16 @@ async function verify_user(username, password) {
     // catch whatever error for debuggings
     console.error(error);
     return "An error occurred while verifying the user.";
+  }
+}
+
+async function token_checker(token) {
+  const doc = Auth.findOne({ auth_key: token });
+  console.log("Doc: " + doc);
+  if (doc) {
+    return doc["username"];
+  } else {
+    return "";
   }
 }
 
@@ -129,11 +150,15 @@ app.get("/", (req, res) => {
   res.sendFile(filePath);
 });
 
+app.get("/user_check", (req, res) => {
+  const token_cookie = req.cookies("token_cookie");
+  res.send(token_checker(token_cookie));
+});
+
 // posts
 app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
   const password = req.body.password_reg;
-  console.log(req.body);
   if (!name || !password) {
     return res.status(400).send("All fields are required!");
   }
