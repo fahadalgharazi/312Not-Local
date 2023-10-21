@@ -35,11 +35,12 @@ function addMessageToChat(messageJSON) {
 }
 
 function makePost() {
-    const chatTextBox = document.getElementById("chat-text-box");
-    const descBox = document.getElementById("")
-    const message = chatTextBox.value;
+    const titleTextBox = document.getElementById("title-text-box");
+    const descBox = document.getElementById("description-text-box")
+    const title = titleTextBox.value;
     const description = descBox.value;
-    chatTextBox.value = "";
+ 
+    titleTextBox.value = "";
     descBox.value = "";
 
     const request = new XMLHttpRequest();
@@ -48,10 +49,12 @@ function makePost() {
             console.log(this.response);
         }
     }
-    const messageJSON = {"message": message, "description": description};
+    const messageJSON = {"title": title, "description": description};
     request.open("POST", "/make-post");
+    request.setRequestHeader('Content-Type', 'application/json')
     request.send(JSON.stringify(messageJSON));
-    chatTextBox.focus();
+    titleTextBox.focus();
+    descBox.focus();
 }
 
 function updateFeed() {
@@ -72,12 +75,13 @@ function updateFeed() {
 function welcome() {
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
-            sendChat();
+            makePost();
         }
     });
 
     document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀";
-    document.getElementById("chat-text-box").focus();
+    document.getElementById("title-text-box").focus();
+    document.getElementById("description-text-box").focus();
 
     updateFeed();
     setInterval(updateFeed, 2000);

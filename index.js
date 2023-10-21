@@ -7,6 +7,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
+const bodyParser = require('body-parser');
 
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
@@ -29,8 +30,23 @@ const user_schema = new Schema({
   password: String,
 });
 
+// Schema for posts
+const post_schema = new Schema({
+  user: String,
+  creation_date: {
+    type: Date,
+    default: Date.now,
+  },
+  title: String,
+  description: String,
+});
+
 // creates a model, which is basically db["User"]
 const User = mongo.model("User", user_schema);
+
+// db["Post"]
+const Post = mongo.model("Post", post_schema);
+
 // DATABASE CRUD
 async function add_new_user(username, password, email) {
   // async and await allow other processes to run while this is running
@@ -48,6 +64,23 @@ async function add_new_user(username, password, email) {
   await new_user
     .save() // can use save() or insertOne() but save() is more convenient
     .then(() => console.log("User saved: ", new_user["name"]))
+    .catch((error) => console.error(error));
+}
+
+// Database function for adding a post
+async function add_new_post(username, title, description) {
+  // async and await allow other processes to run while this is running
+  // create a new document for user
+  const new_post = new Post({
+    user: username,
+    title: title,
+    description: description,
+  });
+
+  // save it to database
+  await new_post
+    .save() // can use save() or insertOne() but save() is more convenient
+    .then(() => console.log("Post saved: ", new_post["user"]))
     .catch((error) => console.error(error));
 }
 
@@ -73,6 +106,8 @@ const setHeaders = function (req, res, next) {
 app.use(setHeaders);
 app.use(cookieParser());
 app.use("/public", express.static("public"));
+app.use(express.json())
+app.use(bodyParser.json());
 
 // http requests
 app.get("/visit-counter", (req, res) => {
@@ -104,9 +139,13 @@ app.get('/', (req, res) => {
     res.sendFile(filePath);
 })
 
-app.post('/make-post', (req, res) => {  
+app.post('/make-post', bodyParser.json(), (req, res) => { 
+    console.log(req.body['title'])
+    title = "my first post"
+    description = "hi guys"
     // Do some DB stuff in here
-    res.send("POST Request Called")
+    //add_new_post("Billy23", title, description)
+    res.send("New POST Made")
  })  
 
 app.listen(port, () => {
