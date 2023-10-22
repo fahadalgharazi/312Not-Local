@@ -22,23 +22,23 @@ function cookie() {
   document.getElementById("paragraph").innerHTML += visVal;
 }
 
-function chatMessageHTML(messageJSON) {
-    const username = messageJSON.user;
-    const message = messageJSON.title;
-    const messageId = messageJSON.description;
-    console.log(messageId)
-    let messageHTML = "<br><button onclick='deleteMessage(\"" + messageId + "\")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
-    return messageHTML;
-}
+// function chatMessageHTML(messageJSON) {
+//     const username = messageJSON.user;
+//     const message = messageJSON.title;
+//     const messageId = messageJSON.description;
+//     console.log(messageId)
+//     let messageHTML = "<br><button onclick='deleteMessage(\"" + messageId + "\")'>X</button> ";
+//     messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
+//     return messageHTML;
+// }
 
 function clearChat() {
-    const chatMessages = document.getElementById("feed");
+    const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML = "";
 }
 
 function addMessageToChat(messageJSON) {
-    const chatMessages = document.getElementById("feed");
+    const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML += chatMessageHTML(messageJSON);
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
@@ -74,6 +74,7 @@ function updateFeed() {
             clearChat();
             const messages = JSON.parse(this.response);
             console.log(messages)
+            // console.log(JSON.stringify(messages))
             for (const message of messages) {
                 addMessageToChat(message);
             }
@@ -115,5 +116,42 @@ function display_username() {
     document.getElementById("description-text-box").focus();
 
     updateFeed();
-    setInterval(updateFeed, 2000);
+    setInterval(updateFeed, 2000); 
+}
+
+
+// postJSON = {
+//     username: "fahad",
+//     descript: "Hello World again",
+//     id: "1738",
+//     title: "first post"
+//   }
+  
+//   document.addEventListener("DOMContentLoaded", functionCall());
+//   function functionCall() {
+//     addMessageToChat(postJSON);
+//   }
+
+
+function postMessageHTML(messageJSON) {
+    console.log(messageJSON)
+    const username = messageJSON.user;
+    const title = messageJSON.title
+    const descript = messageJSON.description;
+    const id = messageJSON.id;
+    let messageHTML = "<div  id='message_" + id + "' class='card'>\
+        <div class='container'>\
+          <h2><b>"+title+"</b></h4> \
+          <h4>"+username+"</h4>\
+          <p> "+descript+"</p> \
+        </div>\
+      </div>";
+    return messageHTML;
+}
+  
+function addMessageToChat(messageJSON) {
+    const chatMessages = document.getElementById("chat-messages");
+    chatMessages.innerHTML += postMessageHTML(messageJSON);
+    chatMessages.scrollIntoView(false);
+    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }

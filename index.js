@@ -148,8 +148,9 @@ async function token_checker(token) {
   }
 }
 async function getAllPosts(){
-  const posts = Post.find({})
-  console.log(posts)
+  const posts = await Post.find({})
+  const jString = JSON.stringify(posts)
+  return posts
 }
 // middlewares
 const setHeaders = function (req, res, next) {
@@ -169,11 +170,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 
 // http requests
-app.get("/update-feed"), (req,res) => {
-  console.log("hi")
-  posts = getAllPosts()
-  res.send()
-}
 
 app.get("/visit-counter", (req, res) => {
   if (req.headers.cookie == undefined) {
@@ -197,6 +193,12 @@ app.get("/user_check", (req, res) => {
   res.send(token_checker(token_cookie));
 });
 
+app.get("/update-feed", (req,res) => {
+  posts = getAllPosts()
+  posts.then(function(result) {
+    res.json(result)
+  })
+});
 // posts
 app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
