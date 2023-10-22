@@ -17,8 +17,10 @@
           class="my_image"
         />
       </div>
-      <div>
-        <p id="paragraph">Welcome to our chat app, where dreams stay dreams but you can make text posts!</p>
+      <div id="display_name">
+        <p id="paragraph">
+          Welcome to our chat app!<br />Currently logged in to:
+        </p>
       </div>
     </div>
 
@@ -34,9 +36,10 @@
           </label>
           <label>
             Description:
+            <!-- <input id="description-text-box" row="4" cols="50" required type="text"/> -->
             <textarea id="description-text-box" row="4" cols="50" required></textarea>
           </label>
-          <button id="chat-button" onclick="sendChat()">Send</button>
+          <button id="chat-button" onclick="makePost()">Send</button>
         </div>
       </div>
 
@@ -105,7 +108,7 @@
       </div>
     </div>
 
-    <script src="public/functions.js"></script>
+    <script src="/public/functions.js"></script>
     <!-- <script src="public/webrtc.js"></script> -->
   </body>
 </html>
