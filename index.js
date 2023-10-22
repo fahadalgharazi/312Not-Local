@@ -108,7 +108,6 @@ async function verify_user(username, password) {
 
 async function token_checker(token) {
   const doc = Auth.findOne({ auth_key: token });
-  console.log("Doc: " + doc);
   if (doc) {
     return doc["username"];
   } else {
