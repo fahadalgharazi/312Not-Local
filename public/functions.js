@@ -26,7 +26,7 @@ postJSON = {
     id: "1738",
     title: "first post"
   }
-  
+
   document.addEventListener("DOMContentLoaded", functionCall());
   function functionCall() {
     addMessageToChat(postJSON);
@@ -43,6 +43,8 @@ function postMessageHTML(postJSON) {
           <h2><b>"+title+"</b></h4> \
           <h4>"+username+"</h4>\
           <p> "+descript+"</p> \
+          <button >LIKE</button>\
+          <p id= 'likes'>Number of Likes: 0</p>\
         </div>\
       </div>";
     return messageHTML;
