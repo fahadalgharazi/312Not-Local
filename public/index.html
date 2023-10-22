@@ -6,21 +6,19 @@
 
   <body onload="display_username();">
     <div class="title">
-      <h2>CSE312 App</h2>
+      <h2>CSE312 App (Better than Twitter)</h2>
     </div>
 
     <div class="header">
       <div class="image_div">
         <img
-          src="public/image/eagle.jpg"
-          alt="It's an eagle"
+          src="public/image/CSE312TWITTER"
+          alt="It's CSE312 Twitter"
           class="my_image"
         />
       </div>
-      <div id="display_name">
-        <p id="paragraph">
-          Welcome to our chat app!<br />Currently logged in to:
-        </p>
+      <div>
+        <p id="paragraph">Welcome to our chat app, where dreams stay dreams but you can make text posts!</p>
       </div>
     </div>
 
@@ -29,10 +27,14 @@
         <div id="chat-messages"></div>
 
         <div class="chat-form">
-          <hr />
+          <hr/>
           <label>
-            Chat:
-            <input id="chat-text-box" type="text" />
+            Title:
+            <input id="title-text-box" type="text"/>
+          </label>
+          <label>
+            Description:
+            <textarea id="description-text-box" row="4" cols="50" required></textarea>
           </label>
           <button id="chat-button" onclick="sendChat()">Send</button>
         </div>
@@ -86,7 +88,7 @@
           </label>
           <input type="submit" value="Post" />
         </form>
-
+        <!--
         <form
           action="/profile-pic"
           id="image-form"
@@ -99,6 +101,7 @@
           <br />
           <input type="submit" value="Post" />
         </form>
+      -->
       </div>
     </div>
 
