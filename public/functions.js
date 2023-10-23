@@ -201,10 +201,11 @@ function likes(id) {
               console.log(this.response);
           }
       }
-      const messageJSON = {"likeStatus": false,"likeId": id}};
+      const messageJSON = {"likeStatus": false,"likeId": id};
       request.open("POST", "/unlike");
       request.setRequestHeader('Content-Type', 'application/json')
       request.send(JSON.stringify(messageJSON));
   }
+  
   likesElement.innerText = `Number of Likes: ${likes}`;
 }
