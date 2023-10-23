@@ -43,7 +43,7 @@ const post_schema = new Schema({
   title: String,
   description: String,
   users_liked: [],
-  // liked: Boolean
+  liked: Boolean
 });
 const auth_schema = new Schema({
   auth_key: String,
@@ -117,7 +117,7 @@ async function add_new_post(username, title, description) {
     title: esc_title,
     description: esc_desc,
     users_liked: [],
-    // liked: false
+    liked: false
   });
   // save it to database
   await new_post
@@ -211,19 +211,20 @@ app.get("/", (req, res) => {
 });
 
 app.get("/user_check", (req, res) => {
-  const token_cookie = req.cookies("token_cookie");
-  res.send(token_checker(token_cookie));
+  const username = req.cookies["username"];
+  // console.log("logged user is:" +username)
+  res.send({"username":username});
 });
 
-app.get("/user_check", (req, res) => {
-  const token_cookie = req.cookies("token_cookie");
-  res.send(token_checker(token_cookie));
-});
+// app.get("/user_check", (req, res) => {
+//   const token_cookie = req.cookies("token_cookie");
+//   res.send(token_checker(token_cookie));
+// });
 
-app.get("/user_check", (req, res) => {
-  const token_cookie = req.cookies["token_cookie"];
-  res.send(token_checker(token_cookie));
-});
+// app.get("/user_check", (req, res) => {
+//   const token_cookie = req.cookies["token_cookie"];
+//   res.send(token_checker(token_cookie));
+// });
 
 app.get("/update-feed", (req,res) => {
   posts = getAllPosts()
@@ -295,21 +296,21 @@ app.post('/make-post', bodyParser.json(), (req, res) => {
  })  
  
 
+// ...
 
 app.post('/like', bodyParser.json(), async (req, res) => { 
-  console.log(req.body)
   const postId = req.body.likeId;
-  const username = req.body.username;
+  const username = req.cookies["username"];
 
   try {
-    const post = await Post.findOne({"_id": postId });
+    const post = await Post.findOne({ _id: postId });
     if (!post) {
       return res.status(404).send("Post not found");
     }
 
     if (!post.users_liked.includes(username)) {
       post.users_liked.push(username);
-      // post.liked = true;
+      post.liked = true;
       await post.save();
       return res.send("Post liked");
     }
@@ -321,11 +322,11 @@ app.post('/like', bodyParser.json(), async (req, res) => {
 });
 
 app.post('/unlike', bodyParser.json(), async (req, res) => { 
-  const postId = req.body.likeId;
-  const username = req.body.username;
+  const postId = req.body.postId;
+  const username = req.cookies["username"];
 
   try {
-    const post = await Post.findOne({"_id": postId });
+    const post = await Post.findOne({ _id: postId });
     if (!post) {
       return res.status(404).send("Post not found");
     }
@@ -333,7 +334,7 @@ app.post('/unlike', bodyParser.json(), async (req, res) => {
     const index = post.users_liked.indexOf(username);
     if (index > -1) {
       post.users_liked.splice(index, 1);
-      // post.liked = false;
+      post.liked = false;
       await post.save();
       return res.send("Post unliked");
     }
