@@ -160,7 +160,7 @@ function postMessageHTML(messageJSON) {
           <h2><b>${title}</b></h4> \
           <h4>${username}</h4>\
           <p>${descript}</p> \
-          <button id='likeBtn_${id}' onclick='likes("${id}","${username}")'>LIKE</button>\
+          <button id='likeBtn_${id}' onclick='likes("${id}")'>LIKE</button>\
           <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
         </div>\
       </div>`;
@@ -171,7 +171,7 @@ function postMessageHTML(messageJSON) {
         <h2><b>${title}</b></h4> \
         <h4>${username}</h4>\
         <p>${descript}</p> \
-        <button id='likeBtn_${id}' onclick='likes("${id}","${username}")'>UNLIKE</button>\
+        <button id='likeBtn_${id}' onclick='likes("${id}")'>UNLIKE</button>\
         <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
       </div>\
     </div>`;
