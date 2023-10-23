@@ -322,7 +322,7 @@ app.post('/like', bodyParser.json(), async (req, res) => {
 });
 
 app.post('/unlike', bodyParser.json(), async (req, res) => { 
-  const postId = req.body.postId;
+  const postId = req.body.likeId;
   const username = req.cookies["username"];
 
   try {

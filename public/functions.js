@@ -137,62 +137,71 @@ function display_username() {
 
 
 function postMessageHTML(messageJSON) {
-  let messageHTML = ""
-    console.log(messageJSON)
-    const username = messageJSON.user;
-    const title = messageJSON.title
-    const descript = messageJSON.description;
-    const id = messageJSON._id;
-    let liked = null
-    // const likeNum = 0
-    let loggedUser = ""
-    const likeNum = messageJSON.users_liked.length
+  let messageHTML = "";
+  console.log(messageJSON);
+  const username = messageJSON.user;
+  const title = messageJSON.title;
+  const descript = messageJSON.description;
+  const id = messageJSON._id;
+  let liked = null;
+  let loggedUser = "";
+  const likeNum = messageJSON.users_liked.length;
 
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-          const userCheck = JSON.parse(this.response);
-          // const userCheck = JSON.parse(this.response);
-          loggedUser = userCheck["username"]
-          console.log("current user: "+loggedUser)
-        }
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const userCheck = JSON.parse(this.response);
+      loggedUser = userCheck["username"];
+      console.log("current user: " + loggedUser);
+      createMessageHTML();
     }
-    request.open("GET", "/user_check");
-    request.send();
-    if (messageJSON.users_liked.includes(loggedUser)){
-        liked = true
-        console.log(username+ " already liked")
-    }
-    else{
-      console.log(username +" hasnt liked")
-      liked = false
-    }
-    console.log(messageJSON.users_liked)
+  };
+  request.open("GET", "/user_check");
+  request.send();
 
-    if (liked == false){
-    messageHTML = `<div id='message_${id}' class='card'>\
+  function createMessageHTML() {
+    if (messageJSON.users_liked.includes(loggedUser)) {
+      liked = true;
+      console.log(username + " already liked");
+    } else {
+      console.log(username + " has not liked");
+      liked = false;
+    }
+    console.log(messageJSON.users_liked);
+
+    if (liked == false) {
+      messageHTML = `<div id='message_${id}' class='card'>\
+          <div class='container'>\
+            <h2><b>${title}</b></h4> \
+            <h4>${username}</h4>\
+            <p>${descript}</p> \
+            <button id='likeBtn_${id}' onclick='likes("${id}")'>LIKE</button>\
+            <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
+          </div>\
+        </div>`;
+    } else {
+      messageHTML = `<div id='message_${id}' class='card'>\
         <div class='container'>\
           <h2><b>${title}</b></h4> \
           <h4>${username}</h4>\
           <p>${descript}</p> \
-          <button id='likeBtn_${id}' onclick='likes("${id}")'>LIKE</button>\
+          <button id='likeBtn_${id}' onclick='likes("${id}")'>UNLIKE</button>\
           <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
         </div>\
       </div>`;
     }
-    else{
-      messageHTML = `<div id='message_${id}' class='card'>\
-      <div class='container'>\
-        <h2><b>${title}</b></h4> \
-        <h4>${username}</h4>\
-        <p>${descript}</p> \
-        <button id='likeBtn_${id}' onclick='likes("${id}")'>UNLIKE</button>\
-        <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
-      </div>\
-    </div>`;
-    }
-    return messageHTML;
+
+    // Insert the message HTML into the chat
+    // For example:
+    const chatMessages = document.getElementById("chat-messages");
+    chatMessages.innerHTML += messageHTML;
+    chatMessages.scrollIntoView(false);
+    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+  }
+
+  return messageHTML;
 }
+
   
 function likes(id) {
   const likeBtn = document.getElementById(`likeBtn_${id}`);
