@@ -116,6 +116,8 @@ async function add_new_post(username, title, description) {
     user: username,
     title: esc_title,
     description: esc_desc,
+    users_liked: [],
+    liked: false
   });
   // save it to database
   await new_post
@@ -291,16 +293,56 @@ app.post('/make-post', bodyParser.json(), (req, res) => {
     }
     res.send("New POST Made")
  })  
+ 
 
- app.post('/like', bodyParser.json(), (req, res) => { 
+// ...
 
-  res.send("liked")
-})  
+app.post('/like', bodyParser.json(), async (req, res) => { 
+  const postId = req.body.postId;
+  const username = req.cookies["username"];
 
- app.post('/unlike', bodyParser.json(), (req, res) => { 
-  
-  res.send("unliked")
-})  
+  try {
+    const post = await Post.findOne({ _id: postId });
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    if (!post.users_liked.includes(username)) {
+      post.users_liked.push(username);
+      post.liked = true;
+      await post.save();
+      return res.send("Post liked");
+    }
+    return res.send("Post already liked");
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return res.status(500).send("A server error has occurred");
+  }
+});
+
+app.post('/unlike', bodyParser.json(), async (req, res) => { 
+  const postId = req.body.postId;
+  const username = req.cookies["username"];
+
+  try {
+    const post = await Post.findOne({ _id: postId });
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    const index = post.users_liked.indexOf(username);
+    if (index > -1) {
+      post.users_liked.splice(index, 1);
+      post.liked = false;
+      await post.save();
+      return res.send("Post unliked");
+    }
+    return res.send("Post not liked by the user");
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return res.status(500).send("A server error has occurred");
+  }
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

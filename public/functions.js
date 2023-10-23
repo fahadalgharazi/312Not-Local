@@ -54,7 +54,7 @@ function clearChat() {
 
 function addMessageToChat(messageJSON) {
     const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML += chatMessageHTML(messageJSON);
+    chatMessages.innerHTML += postMessageHTML(messageJSON);
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
@@ -137,6 +137,7 @@ function display_username() {
 
 
 function postMessageHTML(messageJSON) {
+  let messageHTML = ""
     console.log(messageJSON)
     const username = messageJSON.user;
     const title = messageJSON.title
@@ -144,40 +145,34 @@ function postMessageHTML(messageJSON) {
     const id = messageJSON._id;
     const liked = messageJSON.liked
     if (liked == false){
-    let messageHTML = `<div id='message_${id}' class='card'>\
+    messageHTML = `<div id='message_${id}' class='card'>\
         <div class='container'>\
           <h2><b>${title}</b></h4> \
           <h4>${username}</h4>\
           <p>${descript}</p> \
           <button id='likeBtn_${id}' onclick='likes("${id}")'>LIKE</button>\
-          <p id='likes_${id} '>Number of Likes: 0</p>\
+          <p id='likes_${id}'>Number of Likes: 0</p>\
         </div>\
       </div>`;
     }
     else{
-      let messageHTML = `<div id='message_${id}' class='card'>\
+      messageHTML = `<div id='message_${id}' class='card'>\
       <div class='container'>\
         <h2><b>${title}</b></h4> \
         <h4>${username}</h4>\
         <p>${descript}</p> \
         <button id='likeBtn_${id}' onclick='likes("${id}")'>UNLIKE</button>\
-        <p id='likes_${id} '>Number of Likes: 0</p>\
+        <p id='likes_${id}'>Number of Likes: 0</p>\
       </div>\
     </div>`;
     }
     return messageHTML;
 }
   
-function addMessageToChat(messageJSON) {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML += postMessageHTML(messageJSON);
-    chatMessages.scrollIntoView(false);
-    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
-}
-
 function likes(id) {
   const likeBtn = document.getElementById(`likeBtn_${id}`);
   const likesElement = document.getElementById(`likes_${id}`);
+  console.log(likesElement)
   let likes = parseInt(likesElement.innerText.split(":")[1]);
   if (likeBtn.innerText == "LIKE") {
       likes++;
