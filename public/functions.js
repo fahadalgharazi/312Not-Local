@@ -135,32 +135,36 @@ function display_username() {
 }
 
 
-// postJSON = {
-//     username: "fahad",
-//     descript: "Hello World again",
-//     id: "1738",
-//     title: "first post"
-//   }
-  
-//   document.addEventListener("DOMContentLoaded", functionCall());
-//   function functionCall() {
-//     addMessageToChat(postJSON);
-//   }
-
 
 function postMessageHTML(messageJSON) {
     console.log(messageJSON)
     const username = messageJSON.user;
     const title = messageJSON.title
     const descript = messageJSON.description;
-    const id = messageJSON.id;
-    let messageHTML = "<div  id='message_" + id + "' class='card'>\
+    const id = messageJSON._id;
+    const liked = messageJSON.liked
+    if (liked == false){
+    let messageHTML = `<div id='message_${id}' class='card'>\
         <div class='container'>\
-          <h2><b>"+title+"</b></h4> \
-          <h4>"+username+"</h4>\
-          <p> "+descript+"</p> \
+          <h2><b>${title}</b></h4> \
+          <h4>${username}</h4>\
+          <p>${descript}</p> \
+          <button id='likeBtn_${id}' onclick='likes("${id}")'>LIKE</button>\
+          <p id='likes_${id} '>Number of Likes: 0</p>\
         </div>\
-      </div>";
+      </div>`;
+    }
+    else{
+      let messageHTML = `<div id='message_${id}' class='card'>\
+      <div class='container'>\
+        <h2><b>${title}</b></h4> \
+        <h4>${username}</h4>\
+        <p>${descript}</p> \
+        <button id='likeBtn_${id}' onclick='likes("${id}")'>UNLIKE</button>\
+        <p id='likes_${id} '>Number of Likes: 0</p>\
+      </div>\
+    </div>`;
+    }
     return messageHTML;
 }
   
@@ -169,4 +173,38 @@ function addMessageToChat(messageJSON) {
     chatMessages.innerHTML += postMessageHTML(messageJSON);
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+}
+
+function likes(id) {
+  const likeBtn = document.getElementById(`likeBtn_${id}`);
+  const likesElement = document.getElementById(`likes_${id}`);
+  let likes = parseInt(likesElement.innerText.split(":")[1]);
+  if (likeBtn.innerText == "LIKE") {
+      likes++;
+      likeBtn.innerText = 'UNLIKE';
+      const request = new XMLHttpRequest();
+      request.onreadystatechange = function () {
+          if (this.readyState === 4 && this.status === 200) {
+              console.log(this.response);
+          }
+          const messageJSON = {"likeStatus": true,"likeId": id};
+          request.open("POST", "/like");
+          request.setRequestHeader('Content-Type', 'application/json')
+          request.send(JSON.stringify(messageJSON));
+      }         
+  } else {
+      likes--;
+      likeBtn.innerText = 'LIKE';
+      const request = new XMLHttpRequest();
+      request.onreadystatechange = function () {
+          if (this.readyState === 4 && this.status === 200) {
+              console.log(this.response);
+          }
+      }
+      const messageJSON = {"likeStatus": false,"likeId": id}};
+      request.open("POST", "/unlike");
+      request.setRequestHeader('Content-Type', 'application/json')
+      request.send(JSON.stringify(messageJSON));
+  }
+  likesElement.innerText = `Number of Likes: ${likes}`;
 }

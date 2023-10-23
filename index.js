@@ -42,6 +42,8 @@ const post_schema = new Schema({
   },
   title: String,
   description: String,
+  users_liked: [],
+  liked: Boolean
 });
 const auth_schema = new Schema({
   auth_key: String,
@@ -289,6 +291,16 @@ app.post('/make-post', bodyParser.json(), (req, res) => {
     }
     res.send("New POST Made")
  })  
+
+ app.post('/like', bodyParser.json(), (req, res) => { 
+
+  res.send("liked")
+})  
+
+ app.post('/unlike', bodyParser.json(), (req, res) => { 
+  
+  res.send("unliked")
+})  
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
