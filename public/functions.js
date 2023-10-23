@@ -144,14 +144,18 @@ function postMessageHTML(messageJSON) {
     const descript = messageJSON.description;
     const id = messageJSON._id;
     const liked = messageJSON.liked
+    // const likeNum = 0
+    const likeNum = messageJSON.users_liked.length
+    console.log(messageJSON.users_liked)
+
     if (liked == false){
     messageHTML = `<div id='message_${id}' class='card'>\
         <div class='container'>\
           <h2><b>${title}</b></h4> \
           <h4>${username}</h4>\
           <p>${descript}</p> \
-          <button id='likeBtn_${id}' onclick='likes("${id}")'>LIKE</button>\
-          <p id='likes_${id}'>Number of Likes: 0</p>\
+          <button id='likeBtn_${id}' onclick='likes("${id}","${username}")'>LIKE</button>\
+          <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
         </div>\
       </div>`;
     }
@@ -161,18 +165,18 @@ function postMessageHTML(messageJSON) {
         <h2><b>${title}</b></h4> \
         <h4>${username}</h4>\
         <p>${descript}</p> \
-        <button id='likeBtn_${id}' onclick='likes("${id}")'>UNLIKE</button>\
-        <p id='likes_${id}'>Number of Likes: 0</p>\
+        <button id='likeBtn_${id}' onclick='likes("${id}","${username}")'>UNLIKE</button>\
+        <p id='likes_${id}'>Number of Likes: ${likeNum}</p>\
       </div>\
     </div>`;
     }
     return messageHTML;
 }
   
-function likes(id) {
+function likes(id,username) {
+  console.log(username)
   const likeBtn = document.getElementById(`likeBtn_${id}`);
   const likesElement = document.getElementById(`likes_${id}`);
-  console.log(likesElement)
   let likes = parseInt(likesElement.innerText.split(":")[1]);
   if (likeBtn.innerText == "LIKE") {
       likes++;
@@ -182,11 +186,12 @@ function likes(id) {
           if (this.readyState === 4 && this.status === 200) {
               console.log(this.response);
           }
-          const messageJSON = {"likeStatus": true,"likeId": id};
+        }
+          const messageJSON = {"likeStatus": true,"likeId": id,"username": username};
           request.open("POST", "/like");
           request.setRequestHeader('Content-Type', 'application/json')
           request.send(JSON.stringify(messageJSON));
-      }         
+               
   } else {
       likes--;
       likeBtn.innerText = 'LIKE';
@@ -196,7 +201,7 @@ function likes(id) {
               console.log(this.response);
           }
       }
-      const messageJSON = {"likeStatus": false,"likeId": id};
+      const messageJSON = {"likeStatus": false,"likeId": id,"username":username};
       request.open("POST", "/unlike");
       request.setRequestHeader('Content-Type', 'application/json')
       request.send(JSON.stringify(messageJSON));

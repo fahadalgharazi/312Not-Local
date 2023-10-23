@@ -295,14 +295,14 @@ app.post('/make-post', bodyParser.json(), (req, res) => {
  })  
  
 
-// ...
 
 app.post('/like', bodyParser.json(), async (req, res) => { 
-  const postId = req.body.postId;
-  const username = req.cookies["username"];
+  console.log(req.body)
+  const postId = req.body.likeId;
+  const username = req.body.username;
 
   try {
-    const post = await Post.findOne({ _id: postId });
+    const post = await Post.findOne({"_id": postId });
     if (!post) {
       return res.status(404).send("Post not found");
     }
@@ -321,11 +321,11 @@ app.post('/like', bodyParser.json(), async (req, res) => {
 });
 
 app.post('/unlike', bodyParser.json(), async (req, res) => { 
-  const postId = req.body.postId;
-  const username = req.cookies["username"];
+  const postId = req.body.likeId;
+  const username = req.body.username;
 
   try {
-    const post = await Post.findOne({ _id: postId });
+    const post = await Post.findOne({"_id": postId });
     if (!post) {
       return res.status(404).send("Post not found");
     }
