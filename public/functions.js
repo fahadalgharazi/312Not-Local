@@ -143,9 +143,15 @@ function postMessageHTML(messageJSON) {
     const title = messageJSON.title
     const descript = messageJSON.description;
     const id = messageJSON._id;
-    const liked = messageJSON.liked
+    let liked = messageJSON.liked
     // const likeNum = 0
     const likeNum = messageJSON.users_liked.length
+    if (username in messageJSON.users_liked){
+        liked = true
+    }
+    else{
+      liked = false
+    }
     console.log(messageJSON.users_liked)
 
     if (liked == false){

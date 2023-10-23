@@ -43,7 +43,7 @@ const post_schema = new Schema({
   title: String,
   description: String,
   users_liked: [],
-  liked: Boolean
+  // liked: Boolean
 });
 const auth_schema = new Schema({
   auth_key: String,
@@ -117,7 +117,7 @@ async function add_new_post(username, title, description) {
     title: esc_title,
     description: esc_desc,
     users_liked: [],
-    liked: false
+    // liked: false
   });
   // save it to database
   await new_post
@@ -309,7 +309,7 @@ app.post('/like', bodyParser.json(), async (req, res) => {
 
     if (!post.users_liked.includes(username)) {
       post.users_liked.push(username);
-      post.liked = true;
+      // post.liked = true;
       await post.save();
       return res.send("Post liked");
     }
@@ -333,7 +333,7 @@ app.post('/unlike', bodyParser.json(), async (req, res) => {
     const index = post.users_liked.indexOf(username);
     if (index > -1) {
       post.users_liked.splice(index, 1);
-      post.liked = false;
+      // post.liked = false;
       await post.save();
       return res.send("Post unliked");
     }
