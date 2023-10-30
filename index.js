@@ -90,30 +90,31 @@ async function add_new_user(username, password) {
   console.log("Registering: ", esc_user);
 }
 
-async function add_new_post(username, title, description) {
-  // async and await allow other processes to run while this is running
-  // create a new document for post
-  const esc_title = escapeHTML(title);
-  const esc_desc = escapeHTML(description);
-  const new_post = new Post({
-    user: username,
-    title: esc_title,
-    description: esc_desc,
-  });
-  // save it to database
-  await new_post
-    .save() // can use save() or insertOne() but save() is more convenient
-    .then(() => console.log("Post Made: ", new_post["user"]))
-    .catch((error) => console.error(error));
-}
+// async function add_new_post(username, title, description) {
+//   // async and await allow other processes to run while this is running
+//   // create a new document for post
+//   const esc_title = escapeHTML(title);
+//   const esc_desc = escapeHTML(description);
+//   const new_post = new Post({
+//     user: username,
+//     title: esc_title,
+//     description: esc_desc,
+//   });
+//   // save it to database
+//   await new_post
+//     .save() // can use save() or insertOne() but save() is more convenient
+//     .then(() => console.log("Post Made: ", new_post["user"]))
+//     .catch((error) => console.error(error));
+// }
 
 async function add_new_post(username, title, description) {
   // async and await allow other processes to run while this is running
   // create a new document for post
   const esc_title = escapeHTML(title);
   const esc_desc = escapeHTML(description);
+  const esc_user = escapeHTML(username)
   const new_post = new Post({
-    user: username,
+    user: esc_user,
     title: esc_title,
     description: esc_desc,
     users_liked: [],
