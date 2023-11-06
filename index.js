@@ -6,6 +6,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
+const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 
 //port
@@ -31,6 +32,19 @@ const user_schema = new Schema({
   email: String,
   password: String,
 });
+
+// Schema for posts
+const post_schema = new Schema({
+  user: String,
+  creation_date: {
+    type: Date,
+    default: Date.now,
+  },
+  title: String,
+  description: String,
+  users_liked: [],
+  liked: Boolean
+});
 const auth_schema = new Schema({
   auth_key: String,
   creation_date: {
@@ -41,6 +55,10 @@ const auth_schema = new Schema({
 });
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
+
+// db["Post"]
+const Post = mongo.model("Post", post_schema);
+
 const Auth = mongo.model("Auth", auth_schema);
 //
 function escapeHTML(unsafeText) {
@@ -70,6 +88,43 @@ async function add_new_user(username, password) {
     .then(() => console.log("User saved: ", new_user["name"]))
     .catch((error) => console.error(error));
   console.log("Registering: ", esc_user);
+}
+
+// async function add_new_post(username, title, description) {
+//   // async and await allow other processes to run while this is running
+//   // create a new document for post
+//   const esc_title = escapeHTML(title);
+//   const esc_desc = escapeHTML(description);
+//   const new_post = new Post({
+//     user: username,
+//     title: esc_title,
+//     description: esc_desc,
+//   });
+//   // save it to database
+//   await new_post
+//     .save() // can use save() or insertOne() but save() is more convenient
+//     .then(() => console.log("Post Made: ", new_post["user"]))
+//     .catch((error) => console.error(error));
+// }
+
+async function add_new_post(username, title, description) {
+  // async and await allow other processes to run while this is running
+  // create a new document for post
+  const esc_title = escapeHTML(title);
+  const esc_desc = escapeHTML(description);
+  const esc_user = escapeHTML(username)
+  const new_post = new Post({
+    user: esc_user,
+    title: esc_title,
+    description: esc_desc,
+    users_liked: [],
+    liked: false
+  });
+  // save it to database
+  await new_post
+    .save() // can use save() or insertOne() but save() is more convenient
+    .then(() => console.log("Post Made: ", new_post["user"]))
+    .catch((error) => console.error(error));
 }
 
 async function verify_user(username, password) {
@@ -114,7 +169,11 @@ async function token_checker(token) {
     return "";
   }
 }
-
+async function getAllPosts(){
+  const posts = await Post.find({})
+  const jString = JSON.stringify(posts)
+  return posts
+}
 // middlewares
 const setHeaders = function (req, res, next) {
   const filePath = path.join(__dirname, "public", req.path);
@@ -130,8 +189,10 @@ app.use(cookieParser());
 app.use("/public", express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json())
 
 // http requests
+
 app.get("/visit-counter", (req, res) => {
   if (req.headers.cookie == undefined) {
     res.cookie("Visits", 1, { maxAge: 360000 });
@@ -150,10 +211,27 @@ app.get("/", (req, res) => {
 });
 
 app.get("/user_check", (req, res) => {
-  const token_cookie = req.cookies("token_cookie");
-  res.send(token_checker(token_cookie));
+  const username = req.cookies["username"];
+  // console.log("logged user is:" +username)
+  res.send({"username":username});
 });
 
+// app.get("/user_check", (req, res) => {
+//   const token_cookie = req.cookies("token_cookie");
+//   res.send(token_checker(token_cookie));
+// });
+
+// app.get("/user_check", (req, res) => {
+//   const token_cookie = req.cookies["token_cookie"];
+//   res.send(token_checker(token_cookie));
+// });
+
+app.get("/update-feed", (req,res) => {
+  posts = getAllPosts()
+  posts.then(function(result) {
+    res.json(result)
+  })
+});
 // posts
 app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
@@ -201,6 +279,72 @@ app.post("/login", async (req, res) => {
 });
 
 // running the app
+app.get('/', (req, res) => {
+    const filePath = path.join(__dirname, 'public', req.path);
+    res.sendFile(filePath);
+})
+
+app.post('/make-post', bodyParser.json(), (req, res) => { 
+    console.log(req.body['title'])
+    title = req.body['title']
+    description = req.body['description']
+    token_cookie = req.cookies["username"];
+    if (token_cookie) {
+      add_new_post(token_cookie, title, description)
+    }
+    res.send("New POST Made")
+ })  
+ 
+
+// ...
+
+app.post('/like', bodyParser.json(), async (req, res) => { 
+  const postId = req.body.likeId;
+  const username = req.cookies["username"];
+
+  try {
+    const post = await Post.findOne({ _id: postId });
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    if (!post.users_liked.includes(username)) {
+      post.users_liked.push(username);
+      post.liked = true;
+      await post.save();
+      return res.send("Post liked");
+    }
+    return res.send("Post already liked");
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return res.status(500).send("A server error has occurred");
+  }
+});
+
+app.post('/unlike', bodyParser.json(), async (req, res) => { 
+  const postId = req.body.likeId;
+  const username = req.cookies["username"];
+
+  try {
+    const post = await Post.findOne({ _id: postId });
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    const index = post.users_liked.indexOf(username);
+    if (index > -1) {
+      post.users_liked.splice(index, 1);
+      post.liked = false;
+      await post.save();
+      return res.send("Post unliked");
+    }
+    return res.send("Post not liked by the user");
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return res.status(500).send("A server error has occurred");
+  }
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
