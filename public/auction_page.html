@@ -12,14 +12,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="" />
   </head>
-  <body>
+  <body onload="load_auction()">
+    <h1 id="item_header">Used Eagle</h1>
     <!--[if lt IE 7]>
       <p class="browsehappy">
         You are using an <strong>outdated</strong> browser. Please
         <a href="#">upgrade your browser</a> to improve your experience.
       </p>
     <![endif]-->
-
-    <script src="" async defer></script>
+    <div id="auction_page_item">
+      <img src="images/eagle.jpg" />
+    </div>
+    <div id="item_info">
+      <h2 id="item_owner">Name</h2>
+      <p>
+        Hello I am trying to sell my used pet eagle, Eagly. Please call me at
+        1-800-503-9080 for more details.
+      </p>
+    </div>
+    <script src="functions.js" async defer></script>
   </body>
 </html>
