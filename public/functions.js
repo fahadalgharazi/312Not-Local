@@ -24,13 +24,6 @@ function display_username() {
     display.innerHTML = display.innerText + `<strong> ${username} </strong>`;
   }
 }
-function display_username() {
-  const display = document.getElementById("display_name");
-  let username = cookie_fetch("username");
-  if (username) {
-    display.innerHTML = display.innerText + `<strong> ${username} </strong>`;
-  }
-}
 function cookie() {
   visit = document.cookie;
   visVal = 0;
@@ -204,8 +197,6 @@ function postMessageHTML(messageJSON) {
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop =
       chatMessages.scrollHeight - chatMessages.clientHeight;
-    chatMessages.scrollTop =
-      chatMessages.scrollHeight - chatMessages.clientHeight;
   }
 
   return messageHTML;
@@ -228,31 +219,7 @@ function likes(id) {
     request.open("POST", "/like");
     request.setRequestHeader("Content-Type", "application/json");
     request.send(JSON.stringify(messageJSON));
-    likes++;
-    likeBtn.innerText = "UNLIKE";
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-      if (this.readyState === 4 && this.status === 200) {
-        console.log(this.response);
-      }
-    };
-    const messageJSON = { likeStatus: true, likeId: id };
-    request.open("POST", "/like");
-    request.setRequestHeader("Content-Type", "application/json");
-    request.send(JSON.stringify(messageJSON));
   } else {
-    likes--;
-    likeBtn.innerText = "LIKE";
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-      if (this.readyState === 4 && this.status === 200) {
-        console.log(this.response);
-      }
-    };
-    const messageJSON = { likeStatus: false, likeId: id };
-    request.open("POST", "/unlike");
-    request.setRequestHeader("Content-Type", "application/json");
-    request.send(JSON.stringify(messageJSON));
     likes--;
     likeBtn.innerText = "LIKE";
     const request = new XMLHttpRequest();
