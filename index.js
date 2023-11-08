@@ -6,7 +6,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 
 //port
@@ -43,7 +43,7 @@ const post_schema = new Schema({
   title: String,
   description: String,
   users_liked: [],
-  liked: Boolean
+  liked: Boolean,
 });
 const auth_schema = new Schema({
   auth_key: String,
@@ -53,6 +53,20 @@ const auth_schema = new Schema({
   },
   username: String,
 });
+
+const auction_schema = new Schema({
+  item_name: String,
+  image_path: String,
+  creation_date: {
+    type: Date,
+    default: Date.now,
+  },
+  owner: String,
+  description: String,
+  current_price: Number,
+  price_history: {},
+  id: String,
+});
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
 
@@ -61,6 +75,7 @@ const Post = mongo.model("Post", post_schema);
 
 const Auth = mongo.model("Auth", auth_schema);
 //
+const Auctions = mongo.model("Auctions", auction_schema);
 function escapeHTML(unsafeText) {
   return unsafeText
     .replace(/&/g, "&amp;")
@@ -70,6 +85,36 @@ function escapeHTML(unsafeText) {
     .replace(/'/g, "&#039;");
 }
 // DATABASE CRUD
+async function add_new_auction(
+  user,
+  item,
+  start_price,
+  description,
+  image_path
+) {
+  try {
+    const new_auction = new Auctions({
+      owner: escapeHTML(user),
+      image_path: image_path,
+      item_name: escapeHTML(item),
+      description: escapeHTML(description),
+      current_price: start_price,
+      price_history: { startprice: (start_price, Date.now().toString) },
+      id: (Math.random() * 1000000000).toString, // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
+    });
+  } catch (error) {
+    console.log("Error saving new auction: ", error);
+    return;
+  }
+
+  await new_auction
+    .save()
+    .then(() =>
+      console.log("New auction created! \n", new_auction.toObject().toString)
+    )
+    .catch((error) => console.log("Error saving object: ", error));
+}
+
 async function add_new_user(username, password) {
   // async and await allow other processes to run while this is running
   // create a new document for user
@@ -112,13 +157,13 @@ async function add_new_post(username, title, description) {
   // create a new document for post
   const esc_title = escapeHTML(title);
   const esc_desc = escapeHTML(description);
-  const esc_user = escapeHTML(username)
+  const esc_user = escapeHTML(username);
   const new_post = new Post({
     user: esc_user,
     title: esc_title,
     description: esc_desc,
     users_liked: [],
-    liked: false
+    liked: false,
   });
   // save it to database
   await new_post
@@ -163,17 +208,16 @@ async function verify_user(username, password) {
 
 async function token_checker(token) {
   const doc = Auth.findOne({ auth_key: token });
-  console.log("Doc: " + doc);
   if (doc) {
     return doc["username"];
   } else {
     return "";
   }
 }
-async function getAllPosts(){
-  const posts = await Post.find({})
-  const jString = JSON.stringify(posts)
-  return posts
+async function getAllPosts() {
+  const posts = await Post.find({});
+  const jString = JSON.stringify(posts);
+  return posts;
 }
 // middlewares
 const setHeaders = function (req, res, next) {
@@ -190,7 +234,7 @@ app.use(cookieParser());
 app.use("/public", express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 // http requests
 
@@ -214,7 +258,7 @@ app.get("/", (req, res) => {
 app.get("/user_check", (req, res) => {
   const username = req.cookies["username"];
   // console.log("logged user is:" +username)
-  res.send({"username":username});
+  res.send({ username: username });
 });
 
 // app.get("/user_check", (req, res) => {
@@ -227,12 +271,26 @@ app.get("/user_check", (req, res) => {
 //   res.send(token_checker(token_cookie));
 // });
 
-app.get("/update-feed", (req,res) => {
-  posts = getAllPosts()
-  posts.then(function(result) {
-    res.json(result)
-  })
+app.get("/update-feed", (req, res) => {
+  posts = getAllPosts();
+  posts.then(function (result) {
+    res.json(result);
+  });
 });
+
+app.get("/auction-page", async (req, res) => {
+  // serve the html
+  // const id = req.query;
+  // const auction_data = await Auctions.findOne({ id: id });
+  const auction_page_path = path.join(__dirname, "public", "auction_page.html");
+  res.sendFile(auction_page_path);
+});
+
+app.get("/get-auction-data", async (req, res) => {
+  const auction_data = Auctions.findOne({ id: JSON.parse(req.body) });
+  res.send(JSON.stringify(auction_data));
+});
+
 // posts
 app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
@@ -280,26 +338,25 @@ app.post("/login", async (req, res) => {
 });
 
 // running the app
-app.get('/', (req, res) => {
-    const filePath = path.join(__dirname, 'public', req.path);
-    res.sendFile(filePath);
-})
+app.get("/", (req, res) => {
+  const filePath = path.join(__dirname, "public", req.path);
+  res.sendFile(filePath);
+});
 
-app.post('/make-post', bodyParser.json(), (req, res) => { 
-    console.log(req.body['title'])
-    title = req.body['title']
-    description = req.body['description']
-    token_cookie = req.cookies["username"];
-    if (token_cookie) {
-      add_new_post(token_cookie, title, description)
-    }
-    res.send("New POST Made")
- })  
- 
+app.post("/make-post", bodyParser.json(), (req, res) => {
+  console.log(req.body["title"]);
+  title = req.body["title"];
+  description = req.body["description"];
+  token_cookie = req.cookies["username"];
+  if (token_cookie) {
+    add_new_post(token_cookie, title, description);
+  }
+  res.send("New POST Made");
+});
 
 // ...
 
-app.post('/like', bodyParser.json(), async (req, res) => { 
+app.post("/like", bodyParser.json(), async (req, res) => {
   const postId = req.body.likeId;
   const username = req.cookies["username"];
 
@@ -322,7 +379,7 @@ app.post('/like', bodyParser.json(), async (req, res) => {
   }
 });
 
-app.post('/unlike', bodyParser.json(), async (req, res) => { 
+app.post("/unlike", bodyParser.json(), async (req, res) => {
   const postId = req.body.likeId;
   const username = req.cookies["username"];
 

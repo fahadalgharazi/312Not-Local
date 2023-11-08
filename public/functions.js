@@ -48,72 +48,73 @@ function cookie() {
 // }
 
 function clearChat() {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML = "";
+  const chatMessages = document.getElementById("chat-messages");
+  chatMessages.innerHTML = "";
 }
 
 function addMessageToChat(messageJSON) {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML += postMessageHTML(messageJSON);
-    chatMessages.scrollIntoView(false);
-    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+  const chatMessages = document.getElementById("chat-messages");
+  chatMessages.innerHTML += postMessageHTML(messageJSON);
+  chatMessages.scrollIntoView(false);
+  chatMessages.scrollTop =
+    chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
 function makePost() {
-    const titleTextBox = document.getElementById("title-text-box");
-    const descBox = document.getElementById("description-text-box")
-    const title = titleTextBox.value;
-    const description = descBox.value;
- 
-    titleTextBox.value = "";
-    descBox.value = "";
+  const titleTextBox = document.getElementById("title-text-box");
+  const descBox = document.getElementById("description-text-box");
+  const title = titleTextBox.value;
+  const description = descBox.value;
 
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            console.log(this.response);
-        }
+  titleTextBox.value = "";
+  descBox.value = "";
+
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      console.log(this.response);
     }
-    const messageJSON = {"title": title, "description": description};
-    request.open("POST", "/make-post");
-    request.setRequestHeader('Content-Type', 'application/json')
-    request.send(JSON.stringify(messageJSON));
-    titleTextBox.focus();
-    descBox.focus();
+  };
+  const messageJSON = { title: title, description: description };
+  request.open("POST", "/make-post");
+  request.setRequestHeader("Content-Type", "application/json");
+  request.send(JSON.stringify(messageJSON));
+  titleTextBox.focus();
+  descBox.focus();
 }
 
 function updateFeed() {
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            clearChat();
-            const messages = JSON.parse(this.response);
-            // console.log(messages)
-            // console.log(JSON.stringify(messages))
-            for (const message of messages) {
-                addMessageToChat(message);
-            }
-        }
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      clearChat();
+      const messages = JSON.parse(this.response);
+      // console.log(messages)
+      // console.log(JSON.stringify(messages))
+      for (const message of messages) {
+        addMessageToChat(message);
+      }
     }
-    request.open("GET", "/update-feed");
-    request.send();
+  };
+  request.open("GET", "/update-feed");
+  request.send();
 }
 
 function welcome() {
-    document.addEventListener("keypress", function (event) {
-        if (event.code === "Enter") {
-            makePost();
-        }
-    });
+  document.addEventListener("keypress", function (event) {
+    if (event.code === "Enter") {
+      makePost();
+    }
+  });
 
-    document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀";
-    document.getElementById("title-text-box").focus();
-    document.getElementById("description-text-box").focus();
+  document.getElementById("paragraph").innerHTML +=
+    "<br/>This text was added by JavaScript 😀";
+  document.getElementById("title-text-box").focus();
+  document.getElementById("description-text-box").focus();
 
-    updateFeed();
-    setInterval(updateFeed, 2000);
+  updateFeed();
+  setInterval(updateFeed, 2000);
 }
-
 
 function display_username() {
   const display = document.getElementById("display_name");
@@ -123,18 +124,16 @@ function display_username() {
   }
   document.addEventListener("keypress", function (event) {
     if (event.code === "Enter") {
-        makePost();
-        }
-    });
+      makePost();
+    }
+  });
 
-    document.getElementById("title-text-box").focus();
-    document.getElementById("description-text-box").focus();
+  document.getElementById("title-text-box").focus();
+  document.getElementById("description-text-box").focus();
 
-    updateFeed();
-    setInterval(updateFeed, 2000); 
+  updateFeed();
+  setInterval(updateFeed, 2000);
 }
-
-
 
 function postMessageHTML(messageJSON) {
   let messageHTML = "";
@@ -196,45 +195,68 @@ function postMessageHTML(messageJSON) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML += messageHTML;
     chatMessages.scrollIntoView(false);
-    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+    chatMessages.scrollTop =
+      chatMessages.scrollHeight - chatMessages.clientHeight;
   }
 
   return messageHTML;
 }
 
-  
 function likes(id) {
   const likeBtn = document.getElementById(`likeBtn_${id}`);
   const likesElement = document.getElementById(`likes_${id}`);
   let likes = parseInt(likesElement.innerText.split(":")[1]);
   if (likeBtn.innerText == "LIKE") {
-      likes++;
-      likeBtn.innerText = 'UNLIKE';
-      const request = new XMLHttpRequest();
-      request.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-              console.log(this.response);
-          }
-        }
-          const messageJSON = {"likeStatus": true,"likeId": id};
-          request.open("POST", "/like");
-          request.setRequestHeader('Content-Type', 'application/json')
-          request.send(JSON.stringify(messageJSON));
-               
-  } else {
-      likes--;
-      likeBtn.innerText = 'LIKE';
-      const request = new XMLHttpRequest();
-      request.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-              console.log(this.response);
-          }
+    likes++;
+    likeBtn.innerText = "UNLIKE";
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (this.readyState === 4 && this.status === 200) {
+        console.log(this.response);
       }
-      const messageJSON = {"likeStatus": false,"likeId": id};
-      request.open("POST", "/unlike");
-      request.setRequestHeader('Content-Type', 'application/json')
-      request.send(JSON.stringify(messageJSON));
+    };
+    const messageJSON = { likeStatus: true, likeId: id };
+    request.open("POST", "/like");
+    request.setRequestHeader("Content-Type", "application/json");
+    request.send(JSON.stringify(messageJSON));
+  } else {
+    likes--;
+    likeBtn.innerText = "LIKE";
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (this.readyState === 4 && this.status === 200) {
+        console.log(this.response);
+      }
+    };
+    const messageJSON = { likeStatus: false, likeId: id };
+    request.open("POST", "/unlike");
+    request.setRequestHeader("Content-Type", "application/json");
+    request.send(JSON.stringify(messageJSON));
   }
-  
+
   likesElement.innerText = `Number of Likes: ${likes}`;
+}
+
+function load_auction() {
+  let url = new URL(window.location.href);
+  let params = url.searchParams();
+  let id = params.get("id");
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const auction_data = JSON.parse(this.responseText);
+      const item_name = document.getElementById("item_header");
+      const image = document
+        .getElementById("auction_page_item")
+        .getElementsByTagName("img");
+      const desc = document.getElementById("item_info");
+      const owner = document.getElementById("item_owner");
+      item_name.innerText = auction_data["item_name"];
+      image.src = auction_data["image_path"];
+      desc.innerText = auction_data["description"];
+      owner.innerText = auction_data["owner"];
+    }
+  };
+  request.open("GET", "get-auction-data");
+  request.send(JSON.stringify(id));
 }
