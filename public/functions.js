@@ -37,6 +37,18 @@ function cookie() {
   document.getElementById("paragraph").innerHTML += visVal;
 }
 
+function redirectCreateAuction() {
+  window.location.href = "/public/create_auction.html"; // Replace with your desired URL
+}
+
+function redirectActiveAuctions() {
+  window.location.href = "/public/active_listings.html"; // Replace with your desired URL
+}
+
+function redirectMyAuctions() {
+  window.location.href = "/public/auction_page.html"; // Replace with your desired URL
+}
+
 // function chatMessageHTML(messageJSON) {
 //     const username = messageJSON.user;
 //     const message = messageJSON.title;
@@ -100,7 +112,7 @@ function updateFeed() {
   request.send();
 }
 
-function welcome() {
+/*function welcome() {
   document.addEventListener("keypress", function (event) {
     if (event.code === "Enter") {
       makePost();
@@ -114,6 +126,31 @@ function welcome() {
 
   updateFeed();
   setInterval(updateFeed, 2000);
+}*/
+
+function welcome() {
+  /*document.addEventListener("keypress", function (event) {
+      if (event.code === "Enter") {
+          sendChat();
+      }
+  });*/
+
+
+  //document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀";
+  //document.getElementById("chat-text-box").focus();
+
+  updateAuctions();
+
+  /*if (ws) {
+      initWS();
+  } else {
+      const videoElem = document.getElementsByClassName('video-chat')[0];
+      videoElem.parentElement.removeChild(videoElem);
+      setInterval(updateChat, 2000);
+  }*/
+
+  // use this line to start your video without having to click a button. Helpful for debugging
+  // startVideo();
 }
 
 function display_username() {

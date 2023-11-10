@@ -1,114 +1,72 @@
 <html>
-  <head>
-    <title>CSE312 Group Project</title>
-    <link rel="stylesheet" type="text/css" href="public/style.css" />
-  </head>
+<head>
+    <title>Auction House</title>
+    <link rel="stylesheet" type="text/css" href="public/style.css"/>
+</head>
 
-  <body onload="display_username();">
-    <div class="title">
-      <h2>CSE312 App (Better than Twitter)</h2>
-    </div>
+<body onload="welcome();">
 
-    <div class="header">
-      <div class="image_div">
-        <img
-          src="public/image/CSE312TWITTER"
-          alt="It's CSE312 Twitter"
-          class="my_image"
-        />
-      </div>
-      <div id="display_name">
-        <p id="paragraph">
-          Welcome to our chat app!<br />Currently logged in to:
-        </p>
-      </div>
-    </div>
+<div class="title">
+    <h2>Auction House - Home Page</h2>
+</div>
 
-    <div class="contents">
-      <div class="chat">
-        <div id="chat-messages"></div>
+<div class="headers">
+    
+    <div class="buttons">
 
-        <div class="chat-form">
-          <hr/>
-          <label>
-            Title:
-            <input id="title-text-box" type="text"/>
-          </label>
-          <label>
-            Description:
-            <!-- <input id="description-text-box" row="4" cols="50" required type="text"/> -->
-            <textarea id="description-text-box" row="4" cols="50" required></textarea>
-          </label>
-          <button id="chat-button" onclick="makePost()">Send</button>
+        <div class="create-an-auction">
+            <button id="create-an-auction-button" onclick="redirectCreateAuction()">Create an Auction</button>
         </div>
-      </div>
 
-      <!-- <div class="video-chat">
-        <video class="webrtc-video" id="myVideo" autoplay muted></video>
-        <br />
-        <video class="webrtc-video" id="otherVideo" autoplay></video>
+        <div class="active-listings">
+            <button id="active-listings-button" onclick="redirectActiveAuctions()">View Active Listings</button>
+        </div>
+        
+        <div class="my-auctions">
+            <button id="my-auctions-button" onclick="redirectMyAuctions()">View My Auctions</button>
+        </div>
 
-        <br />
-        <button onclick="startVideo()">Start My Video</button>
-        <br />
-        <button onclick="connectWebRTC()">Start Video Chat</button>
-        <br />
-      </div> -->
+    </div>
 
-      <div class="user-list">
+</div>
+
+
+
+<div class="contents">
+
+    <div id="settled-listings">
+        <div id="settled-auctions-title">
+            <h3>Settled Auctions</h3>
+        </div>
+    </div>
+
+    <div class="user-list">
         Register:
-        <form
-          action="/register"
-          method="POST"
-          enctype="application/x-www-form-urlencoded"
-        >
-          <label
-            >Username:
-            <input id="reg-form-username" type="text" name="username_reg" />
-          </label>
-          <br />
-          <label
-            >Password:&nbsp;
-            <input id="reg-form-pass" type="password" name="password_reg" />
-          </label>
-          <input type="submit" value="Post" />
+        <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="reg-form-username" type="text" name="username_reg"/>
+            </label>
+            <br/>
+            <label>Password:&nbsp;
+                <input id="reg-form-pass" type="password" name="password_reg">
+            </label>
+            <input type="submit" value="Post">
         </form>
 
         Login:
-        <form
-          action="/login"
-          method="post"
-          enctype="application/x-www-form-urlencoded"
-        >
-          <label
-            >Username:
-            <input id="login-form-username" type="text" name="username_login" />
-          </label>
-          <br />
-          <label
-            >Password:&nbsp;
-            <input id="login-form-pass" type="password" name="password_login" />
-          </label>
-          <input type="submit" value="Post" />
+        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="login-form-username" type="text" name="username_login"/>
+            </label>
+            <br/>
+            <label>Password:&nbsp;
+                <input id="login-form-pass" type="password" name="password_login">
+            </label>
+            <input type="submit" value="Post">
         </form>
-        <!--
-        <form
-          action="/profile-pic"
-          id="image-form"
-          method="post"
-          enctype="multipart/form-data"
-        >
-          <br />
-          <label for="form-file">Change profile picture: </label>
-          <input id="form-file" type="file" name="upload" />
-          <br />
-          <input type="submit" value="Post" />
-        </form>
-      -->
-      </div>
     </div>
 
-    <script src="/public/functions.js"></script>
-    <!-- <script src="public/webrtc.js"></script> -->
-  </body>
+<script src="public/functions.js"></script>
+</div>
+</body>
 </html>
