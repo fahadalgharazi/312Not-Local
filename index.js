@@ -124,43 +124,6 @@ async function add_new_user(username, password) {
   console.log("Registering: ", esc_user);
 }
 
-// async function add_new_post(username, title, description) {
-//   // async and await allow other processes to run while this is running
-//   // create a new document for post
-//   const esc_title = escapeHTML(title);
-//   const esc_desc = escapeHTML(description);
-//   const new_post = new Post({
-//     user: username,
-//     title: esc_title,
-//     description: esc_desc,
-//   });
-//   // save it to database
-//   await new_post
-//     .save() // can use save() or insertOne() but save() is more convenient
-//     .then(() => console.log("Post Made: ", new_post["user"]))
-//     .catch((error) => console.error(error));
-// }
-
-async function add_new_post(username, title, description) {
-  // async and await allow other processes to run while this is running
-  // create a new document for post
-  const esc_title = escapeHTML(title);
-  const esc_desc = escapeHTML(description);
-  const esc_user = escapeHTML(username);
-  const new_post = new Post({
-    user: esc_user,
-    title: esc_title,
-    description: esc_desc,
-    users_liked: [],
-    liked: false,
-  });
-  // save it to database
-  await new_post
-    .save() // can use save() or insertOne() but save() is more convenient
-    .then(() => console.log("Post Made: ", new_post["user"]))
-    .catch((error) => console.error(error));
-}
-
 async function verify_user(username, password) {
   const esc_user = escapeHTML(username);
   try {
@@ -203,11 +166,12 @@ async function token_checker(token) {
     return "";
   }
 }
-async function getAllPosts() {
-  const posts = await Post.find({});
-  const jString = JSON.stringify(posts);
-  return jString;
-}
+// Project 2
+// async function getAllPosts() {
+//   const posts = await Post.find({});
+//   const jString = JSON.stringify(posts);
+//   return jString;
+// }
 
 async function getUserWonAuctions(user) {
   try{    
@@ -219,6 +183,17 @@ async function getUserWonAuctions(user) {
     console.log("No auctions yet")
   }
 }
+
+async function getUserCreatedAuctions(user) {
+    try{    
+      const uAuc = await Auctions.find({'owner': user})
+      const jString = JSON.stringify(uAuc)
+      return  uAuc
+    }
+    catch{
+      console.log("No auctions yet")
+    }
+  }
 
 // middlewares
 const setHeaders = function (req, res, next) {
@@ -262,16 +237,34 @@ app.get("/user_check", (req, res) => {
   res.send({ username: username });
 });
 
-app.get("/auctionsWon", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "auctionsWon.html"));
+// Loads Users auctions created 
+app.get("/auctionsCreated", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "auctionsCreated.html"));
 });
-app.get("/loadAuctionsWon", async (req,res) =>{
-  user = "dan"
-  aucts = getUserWonAuctions(user)
+
+app.get("/loadAuctionsCreated", async (req,res) =>{
+  username = req.cookies["username"];
+  username = escapeHTML(username)
+  aucts = getUserCreatedAuctions(username)
   aucts.then(function (result) {
     res.json(result);
   });
 })
+
+// Loads Users auctions won
+app.get("/auctionsWon", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "auctionsWon.html"));
+});
+
+app.get("/loadAuctionsWon", async (req,res) =>{
+    username = req.cookies["username"];
+    username = escapeHTML(username)
+    aucts = getUserWonAuctions(username)
+    aucts.then(function (result) {
+      res.json(result);
+    });
+  })
+
 // app.get("/user_check", (req, res) => {
 //   const token_cookie = req.cookies["token_cookie"];
 //   res.send(token_checker(token_cookie));

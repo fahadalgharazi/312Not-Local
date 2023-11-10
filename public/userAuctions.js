@@ -68,24 +68,25 @@
     request.open("GET", "/loadAuctionsWon");
     request.send();
   }
-  
-  function welcome() {
-    document.addEventListener("keypress", function (event) {
-      if (event.code === "Enter") {
-        makePost();
+
+  function loadAuctionsCreated() {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (this.readyState === 4 && this.status === 200) {
+        clearChat();
+        const messages = JSON.parse(this.response);
+        console.log(messages)
+        console.log(JSON.stringify(messages))
+        for (const message of messages) {
+          addMessageToChat(message);
+        }
       }
-    });
-  
-    document.getElementById("paragraph").innerHTML +=
-      "<br/>This text was added by JavaScript 😀";
-    document.getElementById("title-text-box").focus();
-    document.getElementById("description-text-box").focus();
-  
-    updateFeed();
-    setInterval(updateFeed, 2000);
+    };
+    request.open("GET", "/loadAuctionsCreated");
+    request.send();
   }
   
-  function display_username() {
+  function myAuctionsWon() {
     const display = document.getElementById("display_name");
     let username = cookie_fetch("username");
     if (username) {
@@ -102,6 +103,25 @@
   
     loadAuctionsWon();
     setInterval(loadAuctionsWon, 2000);
+  }
+
+  function myAuctionsCreated() {
+    const display = document.getElementById("display_name");
+    let username = cookie_fetch("username");
+    if (username) {
+      display.innerHTML = display.innerText + `<strong> ${username} </strong>`;
+    }
+    document.addEventListener("keypress", function (event) {
+      if (event.code === "Enter") {
+        makePost();
+      }
+    });
+  
+    document.getElementById("title-text-box").focus();
+    document.getElementById("description-text-box").focus();
+  
+    loadAuctionsCreated();
+    setInterval(loadAuctionsCreated, 2000);
   }
   
   function postAuctionHTML(messageJSON) {
