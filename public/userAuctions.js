@@ -171,7 +171,20 @@
     console.log(messageHTML)
     return messageHTML;
   }
+  function redirectCreateAuction() {
+    window.location.href = "/public/create_auction.html"; // Replace with your desired URL
+  }
   
+  function redirectActiveAuctions() {
+    window.location.href = "/public/active_listings.html"; // Replace with your desired URL
+  }
+  
+  function redirectMyAuctionsCreated() {
+    window.location.href = "/auctionsCreated"; // Replace with your desired URL
+  }
+  function redirectMyAuctionsWon() {
+    window.location.href = "/auctionsWon"; // Replace with your desired URL
+  }
   
   function load_auction() {
     let url = new URL(window.location.href);

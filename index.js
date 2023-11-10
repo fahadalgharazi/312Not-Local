@@ -243,12 +243,17 @@ app.get("/auctionsCreated", (req, res) => {
 });
 
 app.get("/loadAuctionsCreated", async (req,res) =>{
-  username = req.cookies["username"];
-  username = escapeHTML(username)
-  aucts = getUserCreatedAuctions(username)
-  aucts.then(function (result) {
-    res.json(result);
-  });
+  try{
+    username = req.cookies["username"];
+    username = escapeHTML(username)
+    aucts = getUserCreatedAuctions(username)
+    aucts.then(function (result) {
+        res.json(result);
+    });
+}
+  catch{
+    res.send("User is guest")
+  }
 })
 
 // Loads Users auctions won
@@ -257,12 +262,17 @@ app.get("/auctionsWon", (req, res) => {
 });
 
 app.get("/loadAuctionsWon", async (req,res) =>{
-    username = req.cookies["username"];
-    username = escapeHTML(username)
-    aucts = getUserWonAuctions(username)
-    aucts.then(function (result) {
-      res.json(result);
-    });
+    try{
+        username = req.cookies["username"];
+        username = escapeHTML(username)
+        aucts = getUserWonAuctions(username)
+        aucts.then(function (result) {
+        res.json(result);
+        });
+    }
+    catch{
+        res.send("user is guest")
+    }
   })
 
 // app.get("/user_check", (req, res) => {
