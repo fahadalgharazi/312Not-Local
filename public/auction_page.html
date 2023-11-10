@@ -7,13 +7,14 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title></title>
+    <title>Auction House</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="" />
+    <link rel="stylesheet" href="public/auction_page.css" />
+    <script src="public/functions.js" async defer></script>
   </head>
-  <body onload="load_auction()">
-    <h1 id="item_header">Used Eagle</h1>
+  <body onload="display_auction()">
+    <a href="http://localhost:8080">Back to homepage!</a>
     <p id="time_left"></p>
     <!--[if lt IE 7]>
       <p class="browsehappy">
@@ -22,17 +23,28 @@
       </p>
     <![endif]-->
     <div id="auction_page_item">
+      <h1 id="item_header"></h1>
       <img src="images/eagle.jpg" />
     </div>
+    <br />
+    <div id="bid">
+      <h2>Highest Bid:</h2>
+      <p></p>
+      <div>
+        <input />
+        <button>Bid!</button>
+      </div>
+    </div>
+    <h3>Item Information</h3>
+    <br />
     <div id="item_info">
       <h2 id="item_owner"></h2>
       <p id="item_price">Current Price:</p>
       <p id="item_creation_date">Auction created:</p>
-      <p>
+      <p id="desc">
         Hello I am trying to sell my used pet eagle, Eagly. Please call me at
         1-800-503-9080 for more details.
       </p>
     </div>
-    <script src="functions.js" async defer></script>
   </body>
 </html>
