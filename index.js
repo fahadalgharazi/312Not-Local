@@ -65,6 +65,7 @@ const auction_schema = new Schema({
   description: String,
   current_price: Number,
   price_history: {},
+  winner: String,
   id: String,
 });
 // creates a model, which is basically db["users"]
@@ -76,6 +77,7 @@ const Post = mongo.model("Post", post_schema);
 const Auth = mongo.model("Auth", auth_schema);
 //
 const Auctions = mongo.model("Auctions", auction_schema);
+
 function escapeHTML(unsafeText) {
   return unsafeText
     .replace(/&/g, "&amp;")
@@ -85,34 +87,21 @@ function escapeHTML(unsafeText) {
     .replace(/'/g, "&#039;");
 }
 // DATABASE CRUD
-async function add_new_auction(
-  user,
-  item,
-  start_price,
-  description,
-  image_path
-) {
-  try {
-    const new_auction = new Auctions({
-      owner: escapeHTML(user),
-      image_path: image_path,
-      item_name: escapeHTML(item),
-      description: escapeHTML(description),
-      current_price: start_price,
-      price_history: { startprice: (start_price, Date.now().toString) },
-      id: (Math.random() * 1000000000).toString, // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
-    });
-  } catch (error) {
-    console.log("Error saving new auction: ", error);
-    return;
-  }
-
+async function add_new_auction(user,item,start_price,description,image_path, winner) {
+  const new_auction = new Auctions({
+  owner: escapeHTML(user),
+  image_path: image_path,
+  item_name: escapeHTML(item),
+  description: escapeHTML(description),
+  current_price: start_price,
+  price_history: { startprice: (start_price, Date.now().toString) },
+  winner: winner,
+  id: (Math.random() * 1000000000).toString}); // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness});
   await new_auction
     .save()
-    .then(() =>
-      console.log("New auction created! \n", new_auction.toObject().toString)
-    )
+    .then(() => console.log("New auction created! \n", new_auction.toObject().toString))
     .catch((error) => console.log("Error saving object: ", error));
+  // console.log("Cre: ", esc_user);
 }
 
 async function add_new_user(username, password) {
@@ -217,8 +206,20 @@ async function token_checker(token) {
 async function getAllPosts() {
   const posts = await Post.find({});
   const jString = JSON.stringify(posts);
-  return posts;
+  return jString;
 }
+
+async function getUserWonAuctions(user) {
+  try{    
+    const uAuc = await Auctions.find({'winner': user})
+    const jString = JSON.stringify(uAuc)
+    return  uAuc
+  }
+  catch{
+    console.log("No auctions yet")
+  }
+}
+
 // middlewares
 const setHeaders = function (req, res, next) {
   const filePath = path.join(__dirname, "public", req.path);
@@ -261,11 +262,16 @@ app.get("/user_check", (req, res) => {
   res.send({ username: username });
 });
 
-// app.get("/user_check", (req, res) => {
-//   const token_cookie = req.cookies("token_cookie");
-//   res.send(token_checker(token_cookie));
-// });
-
+app.get("/auctionsWon", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "auctionsWon.html"));
+});
+app.get("/loadAuctionsWon", async (req,res) =>{
+  user = "dan"
+  aucts = getUserWonAuctions(user)
+  aucts.then(function (result) {
+    res.json(result);
+  });
+})
 // app.get("/user_check", (req, res) => {
 //   const token_cookie = req.cookies["token_cookie"];
 //   res.send(token_checker(token_cookie));
