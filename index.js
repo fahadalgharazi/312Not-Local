@@ -12,8 +12,7 @@ const { update } = require("lodash");
 
 //port
 const port = 8000;
-console.log("Date: " + Date.now());
-console.log("Date String: " + Date.now.toString());
+
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
 // useUnifiedTopology: use new topology engine
@@ -108,14 +107,17 @@ async function add_new_auction(
 async function update_bid(user, bid, id) {
   if (user && bid && id) {
     const doc = await Auctions.findOne({ id: id });
-    const pH = doc.price_history;
+    //const pH = doc.price_history;
+    let esc_user = await escapeHTML(user);
+    let esc_bid = await escapeHTML(bid);
+    let esc_id = await escapeHTML(id);
 
     console.log("Auction found", await Auctions.findOne({ id: id }));
-    console.log("PH", pH);
-    pH[Date.now()] = { bidder: user, price: bid };
+    // console.log("PH", pH);
+    // pH[Date.now()] = { bidder: user, price: bid };
     await Auctions.findOneAndUpdate(
-      { id: escapeHTML(id) },
-      { price_history: pH, current_bid: [escapeHTML(user), escapeHTML(bid)] }
+      { id: id },
+      { current_bid: [esc_user, esc_bid] }
     );
   }
 }

@@ -84,7 +84,7 @@ async function display_auction() {
 
       // let auction_end_time =
       //   auction_data["creation_date"] + auction_data["length"] - Date.now();
-      let auction_end_time = 1699675930109 + 3600000; //dummy data
+      let auction_end_time = Date.now() + 3600000; //dummy data
       if (auction_end_time - Date.now() > 0) {
         init_countdown(auction_end_time);
       } else {
