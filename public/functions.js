@@ -74,15 +74,80 @@ async function display_auction() {
       let amount = curr_bid[1];
       item_name.innerText = auction_data["item_name"];
       image.src = "public/" + auction_data["image_path"];
-      desc.innerHTML =
-        "<strong>Description:</strong>\n" + auction_data["description"];
+      desc.innerText = "Description:\n" + auction_data["description"];
       owner.innerText += "Seller: " + auction_data["seller"];
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
+
+      let auction_end_time =
+        auction_data["creation_date"] + auction_data["length"] - Date.now();
+      if (auction_end_time > 0) {
+        init_countdown(1699675930109 + 3600000);
+      }
+      else {
+        document.getElementById("time_left").innerText = "";
+        document.getElementById("time_left_prompt") = "Auction over!"
+      }
     }
   };
   request.open("GET", get_url);
   request.send();
+}
+
+function init_countdown(expiration) {
+  let timeLeft = expiration - Date.now();
+  console.log("Time left:", timeLeft);
+  let convertedTime = convertMS(timeLeft);
+  console.log("Converted time", convertedTime);
+  let text =
+    convertedTime["days"] +
+    " days " +
+    convertedTime["hours"] +
+    " hours " +
+    convertedTime["minutes"] +
+    " minutes and " +
+    convertedTime["seconds"] +
+    " seconds.";
+  document.getElementById("time_left").innerText = text;
+  setInterval(() => countdown(expiration), 1000);
+}
+
+function countdown(expiration) {
+  // let countdown = document.getElementById("time_left").innerText.split(" ");
+  let timeLeft = expiration - Date.now();
+  //console.log("Polling:", timeLeft);
+  // let days = Number(countdown[0]) * 86400000;
+  // let hours = Number(countdown[2]) * 3600000;
+  // let minutes = Number(countdown[4]) * 60000;
+  // let seconds = Number(countdown[6]) * 1000;
+
+  let convertedTime = convertMS(timeLeft);
+  let text =
+    convertedTime["days"] +
+    " days, " +
+    convertedTime["hours"] +
+    " hours, " +
+    convertedTime["minutes"] +
+    " minutes and " +
+    convertedTime["seconds"] +
+    " seconds.";
+  document.getElementById("time_left").innerText = text;
+}
+
+function convertMS(ms) {
+  // ms -> d/h/m/s
+  console.log("MS", ms);
+  let days = Math.floor(ms / 86400000); // total days
+  let hours = Math.floor((ms % 86400000) / 3600000); // remaining hours
+  let minutes = Math.floor((ms % 3600000) / 60000); // remaining minutes
+  let seconds = Math.floor((ms % 60000) / 1000); // remaining seconds
+
+  return {
+    days: days,
+    hours: hours,
+    minutes: minutes,
+    seconds: seconds,
+  };
 }
 
 function welcome() {

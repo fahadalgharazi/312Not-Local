@@ -14,20 +14,17 @@
     <script src="public/functions.js" async defer></script>
   </head>
   <body onload="display_auction()">
-    <a href="http://localhost:8080">Back to homepage!</a>
-    <p id="time_left"></p>
-    <!--[if lt IE 7]>
-      <p class="browsehappy">
-        You are using an <strong>outdated</strong> browser. Please
-        <a href="#">upgrade your browser</a> to improve your experience.
-      </p>
-    <![endif]-->
+    <form action="http://localhost:8080">
+      <button id="back_button" type="submit">Back to homepage!</button>
+    </form>
+
     <div id="auction_page_item">
       <h1 id="item_header"></h1>
       <img src="images/eagle.jpg" />
     </div>
-    <br />
     <div id="bid">
+      <p id="time_left_prompt">Auction ends in</p>
+      <strong><p id="time_left"></p></strong>
       <h2>Highest Bid:</h2>
       <p></p>
       <div>
@@ -35,11 +32,12 @@
         <button>Bid!</button>
       </div>
     </div>
-    <h3>Item Information</h3>
-    <br />
     <div id="item_info">
-      <h2 id="item_owner"></h2>
-      <p id="item_price">Current Price:</p>
+      <h3 style="font-size: medium">Item Information</h3>
+      <br />
+      <strong>
+        <p id="item_owner"></p>
+      </strong>
       <p id="item_creation_date">Auction created:</p>
       <p id="desc">
         Hello I am trying to sell my used pet eagle, Eagly. Please call me at

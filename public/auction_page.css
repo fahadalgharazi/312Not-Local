@@ -12,31 +12,20 @@ h3 {
 }
 
 #item_header {
-  background-color: #007bff;
-  color: white;
+  color: black;
   text-align: center;
   padding: 10px 0;
+  margin-bottom: 20px; /* Add margin for spacing */
 }
 
-#auction_page_item {
-  background-color: white;
+#auction_page_item,
+#bid,
+#item_info {
+  background-color: white; /* Neutral background */
   text-align: center;
   padding: 20px;
-  margin: 10px;
-}
-
-#bid {
-  background-color: #e9ecef;
-  padding: 15px;
-  margin: 10px;
-  border-radius: 5px;
-}
-
-#item_info {
-  background-color: white;
-  padding: 15px;
-  margin: 10px;
-  border: 1px solid #ddd;
+  margin: 10px auto; /* Center align the divs */
+  border: 1px solid #ddd; /* Subtle border */
   border-radius: 5px;
 }
 
@@ -49,25 +38,36 @@ button {
 }
 
 button {
-  background-color: #28a745;
-  color: white;
+  background-color: lightgreen; /* Neutral button color */
+  color: black;
   border: none;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #218838;
+  background-color: #c0c0c0; /* Slightly darker on hover */
 }
 
 .browsehappy {
-  color: red;
+  color: #333;
   text-align: center;
   padding: 10px 0;
-  background-color: #ffc107;
+  background-color: #e9ecef; /* Neutral warning background */
 }
 
 img {
   max-width: 100%;
   height: auto;
-  border: 2px solid black;
+  border: 1px solid #ddd; /* Subtle border for image */
+}
+
+a {
+  display: inline-block;
+  margin: 10px;
+  color: #333;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }

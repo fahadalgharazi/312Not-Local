@@ -11,7 +11,8 @@ const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 
 //port
 const port = 8000;
-
+console.log("Date: " + Date.now());
+console.log("Date String: " + Date.now.toString());
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
 // useUnifiedTopology: use new topology engine
@@ -47,13 +48,14 @@ const auction_schema = new Schema({
   image_path: String,
   creation_date: {
     type: Date,
-    default: Date.now,
+    default: Date.now(),
   },
   seller: String,
   description: String,
   current_bid: [String, Number],
   price_history: { String: (String, Number) }, // (date, (bidder,price))
   id: String,
+  length: Number, // in ms
 });
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
@@ -84,7 +86,7 @@ async function add_new_auction(
       item_name: escapeHTML(item),
       description: escapeHTML(description),
       current_bid: ("Start Price", start_price),
-      price_history: { startprice: (start_price, Date.now().toString) },
+      price_history: { startprice: (start_price, new Date.getTime()) },
       id: (Math.random() * 1000000000).toString, // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
     });
   } catch (error) {
