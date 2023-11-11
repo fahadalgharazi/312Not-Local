@@ -8,6 +8,7 @@ const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
+const { update } = require("lodash");
 
 //port
 const port = 8000;
@@ -52,9 +53,10 @@ const auction_schema = new Schema({
   },
   seller: String,
   description: String,
-  current_bid: [String, Number],
-  price_history: { String: (String, Number) }, // (date, (bidder,price))
+  current_bid: [String, Number], // [bidder, amount]
+  //price_history: { String: (String, Number) }, // (date, (bidder,price))
   id: String,
+  Winner: String,
   length: Number, // in ms
 });
 // creates a model, which is basically db["users"]
@@ -85,8 +87,8 @@ async function add_new_auction(
       image_path: image_path,
       item_name: escapeHTML(item),
       description: escapeHTML(description),
-      current_bid: ("Start Price", start_price),
-      price_history: { startprice: (start_price, new Date.getTime()) },
+      current_bid: ["Start Price", start_price],
+      //price_history: { startprice: [start_price, new Date.getTime()] },
       id: (Math.random() * 1000000000).toString, // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
     });
   } catch (error) {
@@ -100,6 +102,22 @@ async function add_new_auction(
       console.log("New auction created! \n", new_auction.toObject().toString)
     )
     .catch((error) => console.log("Error saving object: ", error));
+  // console.log("Cre: ", esc_user);
+}
+
+async function update_bid(user, bid, id) {
+  if (user && bid && id) {
+    const doc = await Auctions.findOne({ id: id });
+    const pH = doc.price_history;
+
+    console.log("Auction found", await Auctions.findOne({ id: id }));
+    console.log("PH", pH);
+    pH[Date.now()] = { bidder: user, price: bid };
+    await Auctions.findOneAndUpdate(
+      { id: escapeHTML(id) },
+      { price_history: pH, current_bid: [escapeHTML(user), escapeHTML(bid)] }
+    );
+  }
 }
 
 async function add_new_user(username, password) {
@@ -121,6 +139,76 @@ async function add_new_user(username, password) {
     .catch((error) => console.error(error));
   console.log("Registering: ", esc_user);
 }
+
+async function verify_user(username, password) {
+  const esc_user = escapeHTML(username);
+  try {
+    const fetched_data = await User.findOne({ name: esc_user });
+    if (fetched_data) {
+      const is_match = await bcrypt.compare(password, fetched_data.password); // returns a promise, await is needed for bool val
+      if (is_match) {
+        // this block of code checks if passwords match, if yes, send an auth token to client
+        const metadata = {
+          // metadata about token
+          type: "user",
+          name: esc_user,
+        };
+        const secret_key = "secret_key_to_sign_for_jwt";
+        const auth_token = jwt.sign(metadata, secret_key, { expiresIn: "1h" });
+        const auth_entry = new Auth({
+          username: esc_user,
+          auth_key: auth_token,
+        });
+        await auth_entry.save(); // save info into database
+        return auth_token;
+      } else {
+        return "Invalid password!";
+      }
+    } else {
+      return "User not found!";
+    }
+  } catch (error) {
+    // catch whatever error for debuggings
+    console.error(error);
+    return "An error occurred while verifying the user.";
+  }
+}
+
+async function token_checker(token) {
+  const doc = Auth.findOne({ auth_key: token });
+  if (doc) {
+    return doc["username"];
+  } else {
+    return "";
+  }
+}
+// Project 2
+// async function getAllPosts() {
+//   const posts = await Post.find({});
+//   const jString = JSON.stringify(posts);
+//   return jString;
+// }
+
+async function getUserWonAuctions(user) {
+  try {
+    const uAuc = await Auctions.find({ winner: user });
+    const jString = JSON.stringify(uAuc);
+    return uAuc;
+  } catch {
+    console.log("No auctions yet");
+  }
+}
+
+async function getUserCreatedAuctions(user) {
+  try {
+    const uAuc = await Auctions.find({ owner: user });
+    const jString = JSON.stringify(uAuc);
+    return uAuc;
+  } catch {
+    console.log("No auctions yet");
+  }
+}
+
 // middlewares
 const setHeaders = function (req, res, next) {
   const filePath = path.join(__dirname, "public", req.path);
@@ -163,10 +251,41 @@ app.get("/user_check", (req, res) => {
   res.send({ username: username });
 });
 
-// app.get("/user_check", (req, res) => {
-//   const token_cookie = req.cookies("token_cookie");
-//   res.send(token_checker(token_cookie));
-// });
+// Loads Users auctions created
+app.get("/auctionsCreated", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "auctionsCreated.html"));
+});
+
+app.get("/loadAuctionsCreated", async (req, res) => {
+  try {
+    username = req.cookies["username"];
+    username = escapeHTML(username);
+    aucts = getUserCreatedAuctions(username);
+    aucts.then(function (result) {
+      res.json(result);
+    });
+  } catch {
+    res.send("User is guest");
+  }
+});
+
+// Loads Users auctions won
+app.get("/auctionsWon", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "auctionsWon.html"));
+});
+
+app.get("/loadAuctionsWon", async (req, res) => {
+  try {
+    username = req.cookies["username"];
+    username = escapeHTML(username);
+    aucts = getUserWonAuctions(username);
+    aucts.then(function (result) {
+      res.json(result);
+    });
+  } catch {
+    res.send("user is guest");
+  }
+});
 
 // app.get("/user_check", (req, res) => {
 //   const token_cookie = req.cookies["token_cookie"];
@@ -194,7 +313,7 @@ app.get("/get-auction-data", async (req, res) => {
   let id = queries["id"];
   //console.log("id in indexjs", id);
   const auction_data = await Auctions.findOne({ id: id });
-  console.log("Auction data", auction_data);
+  //console.log("Auction data", auction_data);
   //console.log("curr_bid", auction_data["current_bid"]);
 
   res.send(JSON.stringify(auction_data));
@@ -245,12 +364,6 @@ app.post("/login", async (req, res) => {
   } else {
     res.status(401).send(user_verification);
   }
-});
-
-// running the app
-app.get("/", (req, res) => {
-  const filePath = path.join(__dirname, "public", req.path);
-  res.sendFile(filePath);
 });
 
 app.post("/make-post", bodyParser.json(), (req, res) => {
@@ -311,6 +424,22 @@ app.post("/unlike", bodyParser.json(), async (req, res) => {
     console.error("Error occurred:", error);
     return res.status(500).send("A server error has occurred");
   }
+});
+
+app.post("/new-bid", async (req, res) => {
+  //console.log("Req body", req.body);
+  const req_body = req.body;
+  let user = req_body["user"];
+  let bid = req_body["bid"];
+  let id = req_body["id"];
+  await update_bid(user, bid, id);
+  res.status(200).send();
+});
+
+app.post("/submit-auction", async (req, res) => {
+  let item_title = req.body.item_title;
+  let item_desc = req.body.item_description;
+  let;
 });
 
 app.listen(port, () => {

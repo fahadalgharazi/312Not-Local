@@ -25,8 +25,11 @@ function redirectActiveAuctions() {
   window.location.href = "/public/active_listings.html"; // Replace with your desired URL
 }
 
-function redirectMyAuctions() {
-  window.location.href = "/public/auction_page.html"; // Replace with your desired URL
+function redirectMyAuctionsCreated() {
+  window.location.href = "/auctionsCreated"; // Replace with your desired URL
+}
+function redirectMyAuctionsWon() {
+  window.location.href = "/auctionsWon"; // Replace with your desired URL
 }
 
 updateAuctions();
@@ -79,14 +82,14 @@ async function display_auction() {
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
 
-      let auction_end_time =
-        auction_data["creation_date"] + auction_data["length"] - Date.now();
-      if (auction_end_time > 0) {
-        init_countdown(1699675930109 + 3600000);
-      }
-      else {
+      // let auction_end_time =
+      //   auction_data["creation_date"] + auction_data["length"] - Date.now();
+      let auction_end_time = 1699675930109 + 3600000; //dummy data
+      if (auction_end_time - Date.now() > 0) {
+        init_countdown(auction_end_time);
+      } else {
         document.getElementById("time_left").innerText = "";
-        document.getElementById("time_left_prompt") = "Auction over!"
+        document.getElementById("time_left_prompt").innerText = "Auction over!";
       }
     }
   };
@@ -152,4 +155,47 @@ function convertMS(ms) {
 
 function welcome() {
   console.log("HELLO");
+}
+
+async function send_data_and_update() {
+  let user = await cookie_fetch("username");
+  let bid = document.getElementById("input2").value;
+  let url = window.location.search;
+  let urlParams = new URLSearchParams(url);
+  let id = urlParams.get("id");
+  let display_bid = document.getElementById("display_bid");
+  console.log("Displaybid", display_bid.innerText);
+  let curr_highest = Number(
+    display_bid.innerText.split(",")[0].split(" ")[2].split("$")[1]
+  ); //Highest Bid: $amount, user
+  console.log("currhighest", curr_highest);
+  let data = {
+    user: user,
+    bid: bid,
+    id: id,
+  };
+
+  if (!user || !bid) {
+    document.getElementById("error_form").innerText =
+      "Error, not signed in or empty field";
+    return;
+  } else if (Number(bid) < curr_highest) {
+    document.getElementById("error_form").innerText =
+      "Error, enter a number higher than current bid.";
+    return;
+  }
+
+  let request = new XMLHttpRequest();
+  request.open("POST", "/new-bid");
+  request.setRequestHeader("Content-Type", "application/json");
+  request.onreadystatechange = function () {
+    if (request.readyState === 4 && request.status === 200) {
+      // Handle response here (success)
+      document.getElementById("input2").innerText = "";
+    } else if (request.readyState === 4) {
+      // Handle response here (error)
+      console.error(request.statusText);
+    }
+  };
+  request.send(JSON.stringify(data));
 }

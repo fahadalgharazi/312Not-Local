@@ -25,11 +25,12 @@
     <div id="bid">
       <p id="time_left_prompt">Auction ends in</p>
       <strong><p id="time_left"></p></strong>
-      <h2>Highest Bid:</h2>
+      <h2 id="display_bid">Highest Bid:</h2>
       <p></p>
-      <div>
-        <input />
-        <button>Bid!</button>
+      <div id="form">
+        <p id="error_form"></p>
+        <input id="input2" placeholder="Bid Amount" />
+        <button onclick="send_data_and_update()">Bid!</button>
       </div>
     </div>
     <div id="item_info">
