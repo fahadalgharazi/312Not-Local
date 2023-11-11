@@ -9,6 +9,11 @@ function cookie_fetch(name) {
   return null;
 }
 
+function num_check(str) {
+  // uses regex to check that str is a number
+  return /^\d+$/.test(str);
+}
+
 function display_username() {
   const display = document.getElementById("display_name");
   let username = cookie_fetch("username");
@@ -175,13 +180,16 @@ async function send_data_and_update() {
     id: id,
   };
 
+  let error = document.getElementById("error_form");
   if (!user || !bid) {
-    document.getElementById("error_form").innerText =
-      "Error, not signed in or empty field";
+    error.innerText = "Error, not signed in or empty field";
     return;
   } else if (Number(bid) < curr_highest) {
     document.getElementById("error_form").innerText =
       "Error, enter a number higher than current bid.";
+    return;
+  } else if (num_check(bid) == false) {
+    error.innerText = "Error, please enter a number";
     return;
   }
 
@@ -192,6 +200,8 @@ async function send_data_and_update() {
     if (request.readyState === 4 && request.status === 200) {
       // Handle response here (success)
       document.getElementById("input2").innerText = "";
+      document.getElementById("error_form").innerText =
+        "Successfully bid $" + bid + "!";
     } else if (request.readyState === 4) {
       // Handle response here (error)
       console.error(request.statusText);
