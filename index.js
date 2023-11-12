@@ -8,7 +8,7 @@ const mongo = require("mongoose");
 const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
-const { update } = require("lodash");
+const multer = require("multer"); // image handling
 
 //port
 const port = 8000;
@@ -90,18 +90,18 @@ async function add_new_auction(
       //price_history: { startprice: [start_price, new Date.getTime()] },
       id: (Math.random() * 1000000000).toString, // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
     });
+    await new_auction
+      .save()
+      .then(() => {
+        console.log("New auction created! \n", new_auction.toObject().toString);
+        return new_auction.id;
+      })
+      .catch((error) => console.log("Error saving object: ", error));
+    // console.log("Cre: ", esc_user);
   } catch (error) {
     console.log("Error saving new auction: ", error);
-    return;
+    return null;
   }
-
-  await new_auction
-    .save()
-    .then(() =>
-      console.log("New auction created! \n", new_auction.toObject().toString)
-    )
-    .catch((error) => console.log("Error saving object: ", error));
-  // console.log("Cre: ", esc_user);
 }
 
 async function update_bid(user, bid, id) {
@@ -227,6 +227,20 @@ app.use("/public", express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/images/"); // path to directory
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null, // no callback func
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname) // names the file (name)-(date).jpg/png/etc.
+    );
+  },
+});
+
+const img_save = multer({ storage: storage }); // multer init
 
 // http requests
 
@@ -437,11 +451,24 @@ app.post("/new-bid", async (req, res) => {
   await update_bid(user, bid, id);
   res.status(200).send();
 });
+// seller,
+//   item,
+//   start_price,
+//   description,
+//   image_path
+app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("No file uploaded.");
+  }
+  let id = await add_new_auction(
+    req.body.seller,
+    req.body.item_title,
+    req.body.starting_price,
+    req.body.item_description,
+    req.file.filename
+  );
 
-app.post("/submit-auction", async (req, res) => {
-  let item_title = req.body.item_title;
-  let item_desc = req.body.item_description;
-  let;
+  res.status(200).redirect("http://localhost:8080/auction-page?id=" + id);
 });
 
 app.listen(port, () => {

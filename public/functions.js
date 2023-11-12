@@ -121,6 +121,7 @@ function init_countdown(expiration) {
 }
 
 function countdown(expiration) {
+  // for specific auction page only, if you want to copy this logic, remove final line
   // let countdown = document.getElementById("time_left").innerText.split(" ");
   let timeLeft = expiration - Date.now();
   //console.log("Polling:", timeLeft);
