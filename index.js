@@ -467,7 +467,7 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     req.body.item_description,
     req.file.filename
   );
-
+  setTimeout(1000);
   res.status(200).redirect("http://localhost:8080/auction-page?id=" + id);
 });
 
