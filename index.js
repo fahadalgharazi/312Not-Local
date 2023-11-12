@@ -214,8 +214,8 @@ async function token_checker(token) {
     return "";
   }
 }
-async function getAllPosts() {
-  const posts = await Post.find({});
+async function getAllItems() {
+  const posts = await auctions.find({});
   const jString = JSON.stringify(posts);
   return posts;
 }
@@ -289,6 +289,12 @@ app.get("/auction-page", async (req, res) => {
 app.get("/get-auction-data", async (req, res) => {
   const auction_data = Auctions.findOne({ id: JSON.parse(req.body) });
   res.send(JSON.stringify(auction_data));
+});
+
+app.get("/items", async (req, res) => {
+  const items = await Auctions.find();
+  console.log(items)
+  res.send(JSON.stringify(items));
 });
 
 // posts
@@ -402,6 +408,13 @@ app.post("/unlike", bodyParser.json(), async (req, res) => {
     return res.status(500).send("A server error has occurred");
   }
 });
+
+//items page
+app.get("/getItems", async(req,res) =>{
+    items = getAllItems
+    print(items)
+});
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

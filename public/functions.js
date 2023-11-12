@@ -297,3 +297,43 @@ function load_auction() {
   request.open("GET", "get-auction-data");
   request.send(JSON.stringify(id));
 }
+
+
+////js for items page
+//test data
+item1 = {
+  "time": 12,
+  "name": "testItem",
+  "desc": "this is a priceless artifact stolen back from the british meusum",
+  "img": "public/CSE312TWITTER.png"
+
+}
+
+function load_items(){
+  let cardContainer = document.getElementById("card-container");
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+      if (this.readyState === 4 && this.status === 200) {
+          const items = JSON.parse(this.response);
+          cardContainer.innerHTML = '';
+          for (const item of items) {
+            cardContainer.innerHTML += `\
+            <div class="card">\
+            <img src="${item["img"]}" alt="item"></img> \
+              <div class="container">\
+                <h4><b>${item["name"]}</b></h4>\
+                <p>${item["desc"]}</p>\
+                </div>\
+            </div>`
+          }
+      }
+  }
+  request.open("GET", "/items");
+  request.send();
+
+
+}
+
+function inter(){
+  setInterval(load_items, 2000);
+}
