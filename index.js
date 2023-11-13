@@ -48,15 +48,15 @@ const auction_schema = new Schema({
   image_path: String,
   creation_date: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
-  seller: String,
+  owner: String,
   description: String,
-  current_bid: [String, Number], // [bidder, amount]
-  //price_history: { String: (String, Number) }, // (date, (bidder,price))
-  id: String,
-  Winner: String,
-  length: Number, // in ms
+  current_bid: [String, Number], // [user,bid]
+  //price_history: {},
+  winner: String,
+  length: Number,
+  id: Math.random().toString(36).substring(2, 15),
 });
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
@@ -78,7 +78,8 @@ async function add_new_auction(
   item,
   start_price,
   description,
-  image_path
+  image_path,
+  length
 ) {
   try {
     const new_auction = new Auctions({
@@ -87,8 +88,9 @@ async function add_new_auction(
       item_name: escapeHTML(item),
       description: escapeHTML(description),
       current_bid: ["Start Price", start_price],
+      length: length,
       //price_history: { startprice: [start_price, new Date.getTime()] },
-      id: (Math.random() * 1000000000).toString, // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
+      // id: (Math.random() * 1000000000).toString(), // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
     });
     await new_auction
       .save()
@@ -235,12 +237,17 @@ app.use(bodyParser.json());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public/images/"); // path to directory
+    cb(null, "public/images/"); // no callback
   },
   filename: function (req, file, cb) {
+    const originalNameWithoutExt = path.basename(
+      file.originalname,
+      path.extname(file.originalname)
+    );
+
     cb(
-      null, // no callback func
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname) // names the file (name)-(date).jpg/png/etc.
+      null,
+      originalNameWithoutExt + Date.now() + path.extname(file.originalname)
     );
   },
 });
@@ -332,9 +339,13 @@ app.get("/get-auction-data", async (req, res) => {
   const queries = req.query;
   //console.log("QUERIES", queries);
   let id = queries["id"];
+
   //console.log("id in indexjs", id);
   const auction_data = await Auctions.findOne({ id: id });
   //console.log("Auction data", auction_data);
+  if (!auction_data) {
+    return res.status(400).send("Auction not found!");
+  }
   //console.log("curr_bid", auction_data["current_bid"]);
 
   res.send(JSON.stringify(auction_data));
@@ -468,18 +479,31 @@ app.post("/new-bid", async (req, res) => {
 //   description,
 //   image_path
 app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
+  const username = req.cookies.username;
+  if (!username) {
+    return res.status(400).send("Not logged in!");
+  }
+
+  if (
+    !req.body.item_title ||
+    !req.body.starting_price ||
+    !req.body.item_description
+  ) {
+    return res.status(400).send("All fields must be filled!");
+  }
+
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
   }
   let id = await add_new_auction(
-    req.body.seller,
+    username,
     req.body.item_title,
     req.body.starting_price,
     req.body.item_description,
-    req.file.filename
+    req.file.filename,
+    req.body.auction_end_time - Date.now()
   );
-  setTimeout(1000);
-  res.status(200).redirect("http://localhost:8080/auction-page?id=" + id);
+  res.status(200).send("http://localhost/auction-page?id=" + id);
 });
 
 //items page

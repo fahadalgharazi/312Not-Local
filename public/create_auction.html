@@ -1,29 +1,64 @@
 <html>
-<head>
+  <head>
     <title>Create an Auction</title>
-    <link rel="stylesheet" type="text/css" href="create_auction.css"/>
-</head>
+    <link rel="stylesheet" type="text/css" href="create_auction.css" />
+  </head>
 
-<body>
+  <body>
     <h1>Create an Auction</h1>
-    <form id="auctionForm" action="/submit-auction" method="post" enctype="multipart/form-data" onsubmit="create_auction()">
-        <label for="item_title">Item Title:</label>
-        <input type="text" id="item_title" name="item_title" required><br><br>
+    <form
+      id="auctionForm"
+      action="/submit-auction"
+      method="post"
+      enctype="multipart/form-data"
+      onsubmit="create_auction()"
+    >
+      <label for="item_title">Item Title:</label>
+      <input
+        type="text"
+        id="item_title"
+        name="item_title"
+        required
+      /><br /><br />
 
-        <label for="item_description">Item Description:</label><br>
-        <textarea id="item_description" name="item_description" rows="4" cols="50" required></textarea><br><br>
+      <label for="item_description">Item Description:</label><br />
+      <textarea
+        id="item_description"
+        name="item_description"
+        rows="4"
+        cols="50"
+        required
+      ></textarea
+      ><br /><br />
 
-        <label for="item_image">Item Image:</label>
-        <input type="file" id="item_image" name="item_image" accept="image/*" required><br><br>
+      <label for="item_image">Item Image:</label>
+      <input
+        type="file"
+        id="item_image"
+        name="item_image"
+        accept="image/*"
+        required
+      /><br /><br />
 
-        <label for="starting_price">Starting Price:</label>
-        <input type="number" id="starting_price" name="starting_price" step="0.01" required><br><br>
+      <label for="starting_price">Starting Price:</label>
+      <input
+        type="number"
+        id="starting_price"
+        name="starting_price"
+        step="0.01"
+        required
+      /><br /><br />
 
-        <label for="auction_end_time">Auction End Time:</label>
-        <input type="datetime-local" id="auction_end_time" name="auction_end_time" required><br><br>
+      <label for="auction_end_time">Auction End Time:</label>
+      <input
+        type="datetime-local"
+        id="auction_end_time"
+        name="auction_end_time"
+        required
+      /><br /><br />
 
-        <input onclick=create_auction() type="button" value="Create Auction">
+      <input type="submit" value="Create Auction" />
     </form>
-<script src="public/functions.js"></script>
-</body>
+    <script src="/public/functions.js"></script>
+  </body>
 </html>
