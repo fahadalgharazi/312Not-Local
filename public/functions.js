@@ -285,3 +285,40 @@ function create_auction() {
 function inter() {
   setInterval(load_items, 2000);
 }
+
+function myAuctionsCreated() {
+  let chatMessagesDiv = document.getElementById("chat-messages");
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const auctions = JSON.parse(this.response);
+      chatMessagesDiv.innerHTML = ""; // Clear previous content
+      auctions.forEach((auction) => {
+        console.log(auction);
+        let auctionDiv = document.createElement("div");
+        auctionDiv.classList.add("auction");
+
+        let title = document.createElement("h3");
+        title.textContent = "Name: " + auction.item_name;
+
+        let description = document.createElement("p");
+        description.textContent = "Desc: " + auction.description;
+        // redir
+        let button = document.createElement("button");
+        button.textContent = "View Auction";
+        button.onclick = () => {
+          itemRedirct(auction.id);
+        };
+        // create the auction
+        auctionDiv.appendChild(title);
+        auctionDiv.appendChild(description);
+        auctionDiv.appendChild(button);
+        chatMessagesDiv.appendChild(auctionDiv);
+      });
+    } else if (this.readyState === 4) {
+      console.error("err", error);
+    }
+  };
+  request.open("GET", "/loadAuctionsCreated");
+  request.send();
+}

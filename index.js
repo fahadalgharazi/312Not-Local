@@ -219,8 +219,7 @@ async function getUserWonAuctions(user) {
 
 async function getUserCreatedAuctions(user) {
   try {
-    const uAuc = await Auctions.find({ owner: user });
-    const jString = JSON.stringify(uAuc);
+    const uAuc = await Auctions.find({ seller: user });
     return uAuc;
   } catch {
     console.log("No auctions yet");
@@ -297,10 +296,8 @@ app.get("/loadAuctionsCreated", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = getUserCreatedAuctions(username);
-    aucts.then(function (result) {
-      res.json(result);
-    });
+    aucts = await getUserCreatedAuctions(username);
+    res.send(aucts);
   } catch {
     res.send("User is guest");
   }
