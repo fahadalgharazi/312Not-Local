@@ -45,8 +45,11 @@ function redirectActiveAuctions() {
   window.location.href = "/public/active_listings.html"; // Replace with your desired URL
 }
 
-function redirectMyAuctions() {
-  window.location.href = "/public/auction_page.html"; // Replace with your desired URL
+function redirectMyAuctionsCreated() {
+  window.location.href = "/auctionsCreated"; // Replace with your desired URL
+}
+function redirectMyAuctionsWon() {
+  window.location.href = "/auctionsWon"; // Replace with your desired URL
 }
 
 // function chatMessageHTML(messageJSON) {

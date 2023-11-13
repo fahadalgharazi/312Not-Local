@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <title>CSE312 Group Project</title>
+    <link rel="stylesheet" type="text/css" href="/public/auctionsWon.css" />
+  </head>
+
+  <body onload="myAuctionsWon();">
+    <div class="title">
+      <h2>Auction House: User Page</h2>
+    </div>
+
+    <div class="header">
+      <div class="image_div">
+        <img
+          src="public/image/CSE312TWITTER.png"
+          alt="It's CSE312 Twitter"
+          class="my_image"
+        />
+      </div>
+      <div id="display_name">
+        <p id="paragraph">
+          Auctions Won!<br />Currently logged in to:
+        </p>
+      </div>
+      <div class="my-auctionsCreated">
+        <button id="my-auctions-created-button" onclick="redirectMyAuctionsCreated()">View My Auctions Created</button>
+    </div>
+    </div>
+
+    <div class="contents">
+      <div class="chat">
+        <div id="chat-messages"></div>
+
+        <div class="chat-form">
+          <hr/>
+          <label>
+            Title:
+            <input id="title-text-box" type="text"/>
+          </label>
+          <label>
+            Description:
+            <!-- <input id="description-text-box" row="4" cols="50" required type="text"/> -->
+            <textarea id="description-text-box" row="4" cols="50" required></textarea>
+          </label>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <script src="/public/userAuctions.js"></script>
+    <script>history.scrollRestoration = "manual"</script>
+    <!-- <script src="public/webrtc.js"></script> -->
+  </body>
+</html>
