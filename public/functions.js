@@ -234,7 +234,7 @@ function load_items() {
         img = "images/" + item["image_path"];
         cardContainer.innerHTML += `\
             <div class="card">\
-            <img src="${img}" alt="item"></img> \
+            <img src="${img}" alt="item" style="width:275px;height:275px"></img> \
               <div class="container">\
                 <h4><b>${item["item_name"]}</b></h4>\
                 <h5><b>${item["current_bid"]}</b></h5>\
