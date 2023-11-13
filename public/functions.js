@@ -274,6 +274,35 @@ function likes(id) {
   likesElement.innerText = `Number of Likes: ${likes}`;
 }
 
+function create_auction() {
+  var form = document.getElementById('auctionForm');
+  var formData_raw = new FormData(form);
+  const request = new XMLHttpRequest();
+
+  var item_title = formData_raw.get('item_title');
+  var item_description = formData_raw.get('item_description');
+  var item_image = formData_raw.get('item_image');
+  var starting_price = formData_raw.get('starting_price');
+  var auction_end_time = formData_raw.get('auction_end_time');
+
+  request.onreadystatechange = function () {
+    if (request.readyState === 4 && request.status === 200) {
+            console.log(request.responseText);
+    }
+  };
+
+  var form_data = {
+    'item_title': item_title,
+    'item_description': item_description,
+    'item_image': item_image,
+    'starting_price': starting_price,
+    'auction_end_time': auction_end_time
+  };
+
+  request.open("POST", "/submit-auction");
+  request.send(JSON.stringify(form_data));
+}
+
 function load_auction() {
   let url = new URL(window.location.href);
   let params = url.searchParams();
