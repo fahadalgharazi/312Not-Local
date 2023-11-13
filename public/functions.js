@@ -253,15 +253,9 @@ function itemRedirct(id) {
   window.location.href = "/auction-page?id=" + id; // Replace with your desired URL
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  // required for preventdefault, to stop default form submission protocol c:
-  document
-    .getElementById("auctionForm")
-    .addEventListener("submit", create_auction);
-});
-
-function create_auction() {
-  // event.preventDefault(); // prevents default submission
+const form = document.getElementById("form");
+form.addEventListener("submit", (event) => {
+  event.preventDefault(); // prevents default submission
   let form = document.getElementById("auctionForm");
   let formData = new FormData(form);
 
@@ -270,8 +264,9 @@ function create_auction() {
     if (request.readyState === 4) {
       console.log(request.responseText);
       if (request.status === 200) {
-        setTimeout(null, 1000);
-        itemRedirct(request.responseText);
+        // setTimeout(null, 1000);
+        console.log("submitted new auction!");
+        // itemRedirct(request.responseText);
       } else {
         console.log("error with creating auction.");
       }
@@ -280,7 +275,7 @@ function create_auction() {
 
   request.open("POST", "/submit-auction");
   request.send(formData); // Send the FormData object
-}
+});
 
 function inter() {
   setInterval(load_items, 2000);
