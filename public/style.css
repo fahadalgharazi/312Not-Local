@@ -1,111 +1,79 @@
 body {
-  background-color: #232323;
+  background-color: burlywood;
   color: white;
 }
 
-.my_image {
-  width: 120px;
-}
-
-#title-text-box {
-  height: 20px;
-  width: 800px;
-  background-color: white;
-  overflow: auto;
-  border: 1px solid black;
-}
-
-#title-text-box-text {
-  color: black;
-}
-
-#description-text-box {
-  height: 40px;
-  width: 800px;
-  background-color: white;
-  overflow: auto;
-  border: 1px solid black;
-}
-
-#description-text-box-text {
-  color: black;
-}
-
-body {
-  background-color: #000000;
-  color: white;
-}
-
-.my_image {
-  height: 100%;
-}
-
-.image_div {
-  height: 80%;
-}
-
-img.post {
-  width: 120px;
-}
 
 .title {
-  height: 5%;
-}
-
-.header {
-  display: flex;
-  /*justify-content: space-around;*/
-  background-color: #f6f1f1;
-  color: black;
-  height: 17%;
-  align-items: center;
+  /*width: 90px; 
+  height: 20px; 
+  left: 4px; 
+  top: 5px; 
+  position: absolute; */
+  text-align: left; 
+  color: black; 
+  font-size: 24px;
+  /*font-family: Inter; 
+  font-weight: 400; 
+  word-wrap: break-word"*/
 }
 
 .contents {
   display: flex;
   justify-content: space-around;
-  height: 78%;
-}
-
-.chat {
-  /*height:100%;*/
-  width: 70%;
-  background-color: #146c94;
-  padding: 20px;
-  /*overflow: scroll;*/
-}
-
-.video-chat {
-  background-color: #158cb4;
-  padding: 20px;
-}
-
-#chat-messages {
-  height: 65%;
-  /*width: 70%;*/
-  /*background-color: aqua;*/
-  /*padding: 20px;*/
-  overflow: scroll;
-}
-
-.chat-form {
-  /*width: 70%;*/
-  /*background-color: aqua;*/
-  /*padding: 20px;*/
-  /*overflow: scroll;*/
-  height: 50px;
+  height: 78%
 }
 
 .user-list {
-  width: 30%;
-  background-color: #19a7ce;
+  width: 20%;
+  background-color: rgb(158, 109, 91);
   padding: 20px;
+  color: black;
 }
 
-.header > div {
-  padding: 20px;
+.buttons {
+  background: #D9D9D9; 
+  border: 1px black solid;
+  position: absolute;
+  top: 1.5%;
+  right: 5%;
+  display: flex; 
+  align-items: center;
 }
 
-.webrtc-video {
-  width: 100%;
+.buttons button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #139465;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 175px;
+}
+
+.buttons button:hover {
+  background-color: #5e746c; 
+}
+
+#settled-listings {
+  height: 100%;
+  width: 70%;
+  /*background-color: aqua;*/
+  /*padding: 20px;*/
+  background-color: #939393;
+  color: black;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  /*flex-grow: 1;*/
+}
+
+#settled-listings-title {
+  text-align: center;
+  font-size: 30px;
+  color: black;
+  padding: 20px 0;
 }
