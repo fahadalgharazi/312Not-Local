@@ -518,14 +518,14 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   }
   console.log("auction end time", req.body.auction_end_time);
   let converted_length = new Date(req.body.auction_end_time).getTime();
-  console.log("!!");
+  console.log(converted_length);
   let id = await add_new_auction(
     username,
     req.body.item_title,
     req.body.starting_price,
     req.body.item_description,
     req.file.filename,
-    converted_length - Date.now()
+    converted_length
   );
   res.status(200).send(id);
 });

@@ -86,8 +86,8 @@ async function display_auction() {
       owner.innerText += "Seller: " + auction_data["seller"];
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
-      creation_date = new Date(auction_data["creation_date"]).getTime();
-      let auction_end_time = creation_date + auction_data["length"];
+      // creation_date = new Date(auction_data["creation_date"]).getTime();
+      let auction_end_time = new Date(auction_data["length"]).getTime();
       // let auction_end_time = Date.now() + 3600000; //dummy data
       console.log("AUCTION END TIME", auction_end_time);
       if (auction_end_time > 0) {
@@ -117,19 +117,14 @@ function init_countdown(expiration) {
     convertedTime["seconds"] +
     " seconds.";
   document.getElementById("time_left").innerText = text;
-  setInterval(() => countdown(expiration), 1000);
+  //setInterval(() => countdown(expiration), 1000);
 }
 
 function countdown(expiration) {
   // for specific auction page only, if you want to copy this logic, remove final
   // let countdown = document.getElementById("time_left").innerText.split(" ");
   let timeLeft = expiration - Date.now();
-  //console.log("Polling:", timeLeft);
-  // let days = Number(countdown[0]) * 86400000;
-  // let hours = Number(countdown[2]) * 3600000;
-  // let minutes = Number(countdown[4]) * 60000;
-  // let seconds = Number(countdown[6]) * 1000;
-
+  console.log("TIMELEFT IN COUNTDOWN", timeLeft);
   let convertedTime = convertMS(timeLeft);
   let text =
     convertedTime["days"] +
@@ -236,7 +231,7 @@ function load_items() {
                 <h4><b>${item["item_name"]}</b></h4>\
                 <h5><b>${item["current_bid"]}</b></h5>\
                 <p>${item["description"]}</p>\
-                <button type="button" onclick="itemRedirct(${item["id"]})">Auction Page</button>
+                <button type="button" onclick="itemRedirct('${item["id"]}')">Auction Page</button>
                 </div>\
             </div>`;
       }
