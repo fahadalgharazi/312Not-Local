@@ -87,7 +87,8 @@ async function display_auction() {
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
       // creation_date = new Date(auction_data["creation_date"]).getTime();
-      let auction_end_time = new Date(auction_data["length"]).getTime();
+      let auction_end_time =
+        new Date(auction_data["length"]).getTime() + 18040000;
       // let auction_end_time = Date.now() + 3600000; //dummy data
       console.log("AUCTION END TIME", auction_end_time);
       if (auction_end_time > 0) {
@@ -125,6 +126,13 @@ function countdown(expiration) {
   // let countdown = document.getElementById("time_left").innerText.split(" ");
   let timeLeft = expiration - Date.now();
   console.log("TIMELEFT IN COUNTDOWN", timeLeft);
+
+  if (timeLeft < 0) {
+    document.getElementById("time_left").innerText = "";
+    document.getElementById("time_left_prompt").innerText = "Auction over!";
+    return;
+  }
+
   let convertedTime = convertMS(timeLeft);
   let text =
     convertedTime["days"] +
