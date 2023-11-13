@@ -352,6 +352,7 @@ function load_items(){
               <div class="container">\
                 <h4><b>${item["name"]}</b></h4>\
                 <p>${item["desc"]}</p>\
+                <button type="button" onclick="">Auction Page</button>
                 </div>\
             </div>`
           }
