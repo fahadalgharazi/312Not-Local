@@ -351,11 +351,12 @@ function load_items(){
           for (const item of items) {
             cardContainer.innerHTML += `\
             <div class="card">\
-            <img src="${item["img"]}" alt="item"></img> \
+            <img src="${item["image_path"]}" alt="item"></img> \
               <div class="container">\
-                <h4><b>${item["name"]}</b></h4>\
-                <p>${item["desc"]}</p>\
-                <button type="button" onclick="">Auction Page</button>
+                <h4><b>${item["item_name"]}</b></h4>\
+                <h5><b>${item["current_bid"]}</b></h5>\
+                <p>${item["description"]}</p>\
+                <button type="button" onclick="itemRedirct(${item["id"]})">Auction Page</button>
                 </div>\
             </div>`
           }
@@ -364,7 +365,10 @@ function load_items(){
   request.open("GET", "/items");
   request.send();
 
+}
 
+function itemRedirct(id){
+    window.location.href = "/auction-page?id=" + id; // Replace with your desired URL
 }
 
 function inter(){
