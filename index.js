@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 const multer = require("multer"); // image handling
+const fs = require("fs");
 
 //port
 const port = 8000;
@@ -487,6 +488,18 @@ app.post("/new-bid", async (req, res) => {
 //   description,
 //   image_path
 app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
+  let multerDirectory = "public/images/";
+  fs.readdir(multerDirectory, (err, files) => {
+    if (err) {
+      console.error("Error reading the directory: ", err);
+      return;
+    }
+
+    console.log(`Contents of ${multerDirectory}:`);
+    files.forEach((file) => {
+      console.log(file);
+    });
+  });
   const username = req.cookies.username;
   if (!username) {
     return res.status(400).send("Not logged in!");
@@ -505,6 +518,7 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   }
   console.log("auction end time", req.body.auction_end_time);
   let converted_length = new Date(req.body.auction_end_time).getTime();
+  console.log("!!");
   let id = await add_new_auction(
     username,
     req.body.item_title,

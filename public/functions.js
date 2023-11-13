@@ -81,7 +81,7 @@ async function display_auction() {
       let bidder = curr_bid[0];
       let amount = curr_bid[1];
       item_name.innerText = auction_data["item_name"];
-      image.src = "public/images" + auction_data["image_path"];
+      image.src = "public/images/" + auction_data["image_path"];
       desc.innerText = "Description:\n" + auction_data["description"];
       owner.innerText += "Seller: " + auction_data["seller"];
       creation_date.innerText += " " + auction_data["creation_date"];
@@ -228,9 +228,10 @@ function load_items() {
       const items = JSON.parse(this.response);
       cardContainer.innerHTML = "";
       for (const item of items) {
+        img = "public/images/" + item["image_path"];
         cardContainer.innerHTML += `\
             <div class="card">\
-            <img src="${item["image_path"]}" alt="item"></img> \
+            <img src="${img}" alt="item"></img> \
               <div class="container">\
                 <h4><b>${item["item_name"]}</b></h4>\
                 <h5><b>${item["current_bid"]}</b></h5>\
