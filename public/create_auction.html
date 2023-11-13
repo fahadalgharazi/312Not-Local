@@ -6,7 +6,7 @@
 
 <body>
     <h1>Create an Auction</h1>
-    <form action="/submit-auction" method="post" enctype="multipart/form-data"></form>
+    <form id="auctionForm" action="/submit-auction" method="post" enctype="multipart/form-data" onsubmit="create_auction()">
         <label for="item_title">Item Title:</label>
         <input type="text" id="item_title" name="item_title" required><br><br>
 
@@ -24,5 +24,6 @@
 
         <input onclick=create_auction() type="button" value="Create Auction">
     </form>
+<script src="public/functions.js"></script>
 </body>
 </html>
