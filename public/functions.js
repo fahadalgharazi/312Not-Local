@@ -87,8 +87,7 @@ async function display_auction() {
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
       creation_date = new Date(auction_data["creation_date"]).getTime();
-      let auction_end_time =
-        creation_date + auction_data["length"] - Date.now();
+      let auction_end_time = creation_date + auction_data["length"];
       // let auction_end_time = Date.now() + 3600000; //dummy data
       console.log("AUCTION END TIME", auction_end_time);
       if (auction_end_time > 0) {
@@ -104,17 +103,17 @@ async function display_auction() {
 }
 
 function init_countdown(expiration) {
-  let timeLeft = expiration;
+  let timeLeft = expiration - Date.now();
   console.log("Time left:", timeLeft);
   let convertedTime = convertMS(timeLeft);
   console.log("Converted time", convertedTime);
   let text =
     convertedTime["days"] +
-    " days " +
+    " days, " +
     convertedTime["hours"] +
-    " hours " +
+    " hours, " +
     convertedTime["minutes"] +
-    " minutes and " +
+    " minutes and, " +
     convertedTime["seconds"] +
     " seconds.";
   document.getElementById("time_left").innerText = text;
@@ -124,7 +123,7 @@ function init_countdown(expiration) {
 function countdown(expiration) {
   // for specific auction page only, if you want to copy this logic, remove final
   // let countdown = document.getElementById("time_left").innerText.split(" ");
-  let timeLeft = expiration;
+  let timeLeft = expiration - Date.now();
   //console.log("Polling:", timeLeft);
   // let days = Number(countdown[0]) * 86400000;
   // let hours = Number(countdown[2]) * 3600000;
