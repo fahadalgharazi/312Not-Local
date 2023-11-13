@@ -81,16 +81,17 @@ async function display_auction() {
       let bidder = curr_bid[0];
       let amount = curr_bid[1];
       item_name.innerText = auction_data["item_name"];
-      image.src = "public/" + auction_data["image_path"];
+      image.src = "public/images" + auction_data["image_path"];
       desc.innerText = "Description:\n" + auction_data["description"];
       owner.innerText += "Seller: " + auction_data["seller"];
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
-
+      creation_date = new Date(auction_data["creation_date"]).getTime();
       let auction_end_time =
-        auction_data["creation_date"] + auction_data["length"] - Date.now();
+        creation_date + auction_data["length"] - Date.now();
       // let auction_end_time = Date.now() + 3600000; //dummy data
-      if (auction_end_time - Date.now() > 0) {
+      console.log("AUCTION END TIME", auction_end_time);
+      if (auction_end_time > 0) {
         init_countdown(auction_end_time);
       } else {
         document.getElementById("time_left").innerText = "";
@@ -103,7 +104,7 @@ async function display_auction() {
 }
 
 function init_countdown(expiration) {
-  let timeLeft = expiration - Date.now();
+  let timeLeft = expiration;
   console.log("Time left:", timeLeft);
   let convertedTime = convertMS(timeLeft);
   console.log("Converted time", convertedTime);
@@ -123,7 +124,7 @@ function init_countdown(expiration) {
 function countdown(expiration) {
   // for specific auction page only, if you want to copy this logic, remove final
   // let countdown = document.getElementById("time_left").innerText.split(" ");
-  let timeLeft = expiration - Date.now();
+  let timeLeft = expiration;
   //console.log("Polling:", timeLeft);
   // let days = Number(countdown[0]) * 86400000;
   // let hours = Number(countdown[2]) * 3600000;
@@ -185,7 +186,7 @@ async function send_data_and_update() {
   if (!user || !bid) {
     error.innerText = "Error, not signed in or empty field";
     return;
-  } else if (Number(bid) < curr_highest) {
+  } else if (Number(bid) <= curr_highest) {
     document.getElementById("error_form").innerText =
       "Error, enter a number higher than current bid.";
     return;

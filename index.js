@@ -50,13 +50,13 @@ const auction_schema = new Schema({
     type: Date,
     default: Date.now,
   },
-  owner: String,
+  seller: String,
   description: String,
   current_bid: [String, Number], // [user,bid]
-  //price_history: {},
+  price_history: {}, // inside price history [Date, User, Bid]
   winner: String,
   length: Number,
-  id: Math.random().toString(36).substring(2, 15),
+  id: String,
 });
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
@@ -82,24 +82,27 @@ async function add_new_auction(
   length
 ) {
   try {
+    // console.log("Seller", seller);
+    // console.log("Item", item);
+    // console.log("Start price", start_price);
+    // console.log("Desc", description);
+    // console.log("Image path", image_path);
+    // console.log("Length", length);
+
     const new_auction = new Auctions({
       seller: escapeHTML(seller),
       image_path: image_path,
       item_name: escapeHTML(item),
       description: escapeHTML(description),
-      current_bid: ["Start Price", start_price],
+      current_bid: [seller, start_price],
       length: length,
-      //price_history: { startprice: [start_price, new Date.getTime()] },
-      // id: (Math.random() * 1000000000).toString(), // might still have conflicts if unlucky enough, change this to jwt token for guarenteed uniqueness
+      id: Math.random().toString(36).substring(2, 15), // random id
+      price_history: { [Date.now()]: [seller, start_price] },
     });
-    await new_auction
-      .save()
-      .then(() => {
-        console.log("New auction created! \n", new_auction.toObject().toString);
-        return new_auction.id;
-      })
-      .catch((error) => console.log("Error saving object: ", error));
-    // console.log("Cre: ", esc_user);
+
+    await new_auction.save();
+    console.log("New auction created! \n", new_auction);
+    return new_auction.id; // return id for redirection purposes
   } catch (error) {
     console.log("Error saving new auction: ", error);
     return null;
@@ -119,7 +122,12 @@ async function update_bid(user, bid, id) {
     // pH[Date.now()] = { bidder: user, price: bid };
     await Auctions.findOneAndUpdate(
       { id: id },
-      { current_bid: [esc_user, esc_bid] }
+      {
+        $set: {
+          current_bid: [esc_user, esc_bid],
+          [`price_history.${new Date().toISOString()}`]: [esc_user, esc_bid],
+        },
+      }
     );
   }
 }
@@ -495,15 +503,17 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
   }
+  console.log("auction end time", req.body.auction_end_time);
+  let converted_length = new Date(req.body.auction_end_time).getTime();
   let id = await add_new_auction(
     username,
     req.body.item_title,
     req.body.starting_price,
     req.body.item_description,
     req.file.filename,
-    req.body.auction_end_time - Date.now()
+    converted_length - Date.now()
   );
-  res.status(200).send("http://localhost/auction-page?id=" + id);
+  res.status(200).send(id);
 });
 
 //items page
