@@ -190,6 +190,11 @@ async function token_checker(token) {
 //   const jString = JSON.stringify(posts);
 //   return jString;
 // }
+async function getAllItems() {
+  const posts = await auctions.find({});
+  const jString = JSON.stringify(posts);
+  return posts;
+}
 
 async function getUserWonAuctions(user) {
   try {
@@ -335,6 +340,12 @@ app.get("/get-auction-data", async (req, res) => {
   res.send(JSON.stringify(auction_data));
 });
 
+app.get("/items", async (req, res) => {
+  const items = await Auctions.find();
+  console.log(items);
+  res.send(JSON.stringify(items));
+});
+
 // posts
 app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
@@ -469,6 +480,12 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   );
   setTimeout(1000);
   res.status(200).redirect("http://localhost:8080/auction-page?id=" + id);
+});
+
+//items page
+app.get("/getItems", async (req, res) => {
+  items = getAllItems;
+  print(items);
 });
 
 app.listen(port, () => {

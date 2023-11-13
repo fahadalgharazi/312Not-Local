@@ -87,9 +87,9 @@ async function display_auction() {
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
 
-      // let auction_end_time =
-      //   auction_data["creation_date"] + auction_data["length"] - Date.now();
-      let auction_end_time = Date.now() + 3600000; //dummy data
+      let auction_end_time =
+        auction_data["creation_date"] + auction_data["length"] - Date.now();
+      // let auction_end_time = Date.now() + 3600000; //dummy data
       if (auction_end_time - Date.now() > 0) {
         init_countdown(auction_end_time);
       } else {
@@ -209,4 +209,46 @@ async function send_data_and_update() {
     }
   };
   request.send(JSON.stringify(data));
+}
+
+////js for items page
+//test data
+item1 = {
+  time: 12,
+  name: "testItem",
+  desc: "this is a priceless artifact stolen back from the british meusum",
+  img: "public/CSE312TWITTER.png",
+};
+
+function load_items() {
+  let cardContainer = document.getElementById("card-container");
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const items = JSON.parse(this.response);
+      cardContainer.innerHTML = "";
+      for (const item of items) {
+        cardContainer.innerHTML += `\
+            <div class="card">\
+            <img src="${item["image_path"]}" alt="item"></img> \
+              <div class="container">\
+                <h4><b>${item["item_name"]}</b></h4>\
+                <h5><b>${item["current_bid"]}</b></h5>\
+                <p>${item["description"]}</p>\
+                <button type="button" onclick="itemRedirct(${item["id"]})">Auction Page</button>
+                </div>\
+            </div>`;
+      }
+    }
+  };
+  request.open("GET", "/items");
+  request.send();
+}
+
+function itemRedirct(id) {
+  window.location.href = "/auction-page?id=" + id; // Replace with your desired URL
+}
+
+function inter() {
+  setInterval(load_items, 2000);
 }
