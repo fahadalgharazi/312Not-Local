@@ -58,6 +58,7 @@ const auction_schema = new Schema({
   winner: String,
   length: Number,
   id: String,
+  finished: Boolean,
 });
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
@@ -99,6 +100,7 @@ async function add_new_auction(
       length: length,
       id: Math.random().toString(36).substring(2, 15), // random id
       price_history: { [Date.now()]: [seller, start_price] },
+      finished: false,
     });
 
     await new_auction.save();
@@ -251,7 +253,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const originalNameWithoutExt = path.basename(
       file.originalname,
-      path.extname(file.originalname)
+      path.extname(file.originalname).replace("/", "")
     );
 
     cb(
@@ -361,7 +363,7 @@ app.get("/get-auction-data", async (req, res) => {
 });
 
 app.get("/items", async (req, res) => {
-  const items = await Auctions.find();
+  const items = await Auctions.find({ finished: false });
   console.log(items);
   res.send(JSON.stringify(items));
 });

@@ -118,7 +118,7 @@ function init_countdown(expiration) {
     convertedTime["seconds"] +
     " seconds.";
   document.getElementById("time_left").innerText = text;
-  //setInterval(() => countdown(expiration), 1000);
+  setInterval(() => countdown(expiration), 1000);
 }
 
 function countdown(expiration) {
@@ -231,7 +231,7 @@ function load_items() {
       const items = JSON.parse(this.response);
       cardContainer.innerHTML = "";
       for (const item of items) {
-        img = "public/images/" + item["image_path"];
+        img = "images/" + item["image_path"];
         cardContainer.innerHTML += `\
             <div class="card">\
             <img src="${img}" alt="item"></img> \

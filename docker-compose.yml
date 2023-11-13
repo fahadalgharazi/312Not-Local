@@ -1,27 +1,12 @@
-# version: "3"
-# services:
-#   app:
-#     build: .
-#     ports:
-#       - "8080:8000"
-#     # volumes:
-#     #   - ./312Not-Local:/root # Ensure this maps the current directory to /root in the container
-#   mongo:
-#     image: mongo
-#     ports:
-#       - "27017:27017"
 version: "3"
 services:
   app:
     build: .
     ports:
       - "8080:8000"
-    volumes:
-      - my_volume:/app/public/images/
+    # volumes:
+    #   - ./312Not-Local:/root # Ensure this maps the current directory to /root in the container
   mongo:
     image: mongo
     ports:
       - "27017:27017"
-
-volumes:
-  my_volume:
