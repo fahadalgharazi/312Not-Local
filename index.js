@@ -12,7 +12,7 @@ const multer = require("multer"); // image handling
 const fs = require("fs");
 
 //port
-const port = 8000;
+const port = 8080;
 
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
