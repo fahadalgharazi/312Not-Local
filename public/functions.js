@@ -206,6 +206,7 @@ async function send_data_and_update() {
       document.getElementById("input2").innerText = "";
       document.getElementById("error_form").innerText =
         "Successfully bid $" + bid + "!";
+      location.reload();
     } else if (request.readyState === 4) {
       // Handle response here (error)
       console.error(request.statusText);
@@ -270,6 +271,8 @@ function create_auction() {
     if (request.readyState === 4) {
       console.log(request.responseText);
       if (request.status === 200) {
+        console.log("Redirecting");
+        console.log("RESP", request.responseText);
         setTimeout(null, 1000);
         itemRedirct(request.responseText);
       } else {

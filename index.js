@@ -10,10 +10,75 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 const multer = require("multer"); // image handling
 const fs = require("fs");
-
+const rateLimit = require("express-rate-limit");
 //port
 const port = 8000;
 
+// middlewares
+const setHeaders = function (req, res, next) {
+  const filePath = path.join(__dirname, "public", req.path);
+  const mimeType = mime.lookup(filePath);
+  if (mimeType) {
+    res.type(mimeType);
+  }
+  res.set("X-Content-Type-Options", "nosniff");
+  next();
+};
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/images/"); // no callback
+  },
+  filename: function (req, file, cb) {
+    const originalNameWithoutExt = path.basename(
+      file.originalname,
+      path.extname(file.originalname).replace("/", "")
+    );
+
+    cb(
+      null,
+      originalNameWithoutExt + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const img_save = multer({ storage: storage }); // multer init
+const limited_users = {};
+const limiter = rateLimit({
+  windowMs: 10000, // 10 seconds
+  max: 50, // Limit each IP to 50 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next) => {
+    const now = Date.now();
+    limited_users[req.ip] = now + 30000; // Block for 30 sec
+    res
+      .status(429)
+      .send("429 Too many requests! You are blocked for 30 seconds.");
+  },
+});
+
+// check if the user is blocked
+app.use((req, res, next) => {
+  const blockTime = limited_users[req.ip];
+  if (Date.now() < blockTime) {
+    return res
+      .status(429)
+      .send(
+        `429 Too Many Requests! \n Blocked. Try again in ${
+          (blockTime - Date.now()) / 1000
+        } seconds`
+      );
+  }
+  next();
+});
+
+app.use(setHeaders);
+app.use(cookieParser());
+app.use("/public", express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(limiter);
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
 // useUnifiedTopology: use new topology engine
@@ -228,42 +293,6 @@ async function getUserCreatedAuctions(user) {
     console.log("No auctions yet");
   }
 }
-
-// middlewares
-const setHeaders = function (req, res, next) {
-  const filePath = path.join(__dirname, "public", req.path);
-  const mimeType = mime.lookup(filePath);
-  if (mimeType) {
-    res.type(mimeType);
-  }
-  res.set("X-Content-Type-Options", "nosniff");
-  next();
-};
-app.use(setHeaders);
-app.use(cookieParser());
-app.use("/public", express.static("public"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/images/"); // no callback
-  },
-  filename: function (req, file, cb) {
-    const originalNameWithoutExt = path.basename(
-      file.originalname,
-      path.extname(file.originalname).replace("/", "")
-    );
-
-    cb(
-      null,
-      originalNameWithoutExt + Date.now() + path.extname(file.originalname)
-    );
-  },
-});
-
-const img_save = multer({ storage: storage }); // multer init
 
 // http requests
 
