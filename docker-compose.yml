@@ -1,5 +1,10 @@
 version: "3"
 services:
+  nginx:
+    build: ./nginx
+    ports:
+      - '80:80'
+      - '443:443'
   app:
     build: .
     ports:

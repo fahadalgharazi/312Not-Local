@@ -88,7 +88,11 @@ async function display_auction() {
       price.innerText += " $" + amount + ", " + bidder;
       // creation_date = new Date(auction_data["creation_date"]).getTime();
       let auction_end_time =
+<<<<<<< HEAD
         new Date(auction_data["length"]).getTime() + 18040000;
+=======
+        new Date(auction_data["length"]).getTime() + 18040000; // adds 5 hrs
+>>>>>>> 1ff43f16d015adbc09469a056b5e447b6b0dac14
       // let auction_end_time = Date.now() + 3600000; //dummy data
       console.log("AUCTION END TIME", auction_end_time);
       if (auction_end_time > 0) {
@@ -125,6 +129,13 @@ function countdown(expiration) {
   // for specific auction page only, if you want to copy this logic, remove final
   // let countdown = document.getElementById("time_left").innerText.split(" ");
   let timeLeft = expiration - Date.now();
+
+  if (timeLeft < 0) {
+    document.getElementById("time_left").innerText = "";
+    document.getElementById("time_left_prompt").innerText = "Auction over!";
+    return;
+  }
+
   console.log("TIMELEFT IN COUNTDOWN", timeLeft);
 
   if (timeLeft < 0) {
@@ -253,15 +264,9 @@ function itemRedirct(id) {
   window.location.href = "/auction-page?id=" + id; // Replace with your desired URL
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  // required for preventdefault, to stop default form submission protocol c:
-  document
-    .getElementById("auctionForm")
-    .addEventListener("submit", create_auction);
-});
-
-function create_auction() {
-  // event.preventDefault(); // prevents default submission
+const form = document.getElementById("form");
+form.addEventListener("submit", (event) => {
+  event.preventDefault(); // prevents default submission
   let form = document.getElementById("auctionForm");
   let formData = new FormData(form);
 
@@ -270,8 +275,9 @@ function create_auction() {
     if (request.readyState === 4) {
       console.log(request.responseText);
       if (request.status === 200) {
-        setTimeout(null, 1000);
-        itemRedirct(request.responseText);
+        // setTimeout(null, 1000);
+        console.log("submitted new auction!");
+        // itemRedirct(request.responseText);
       } else {
         console.log("error with creating auction.");
       }
@@ -280,8 +286,45 @@ function create_auction() {
 
   request.open("POST", "/submit-auction");
   request.send(formData); // Send the FormData object
-}
+});
 
 function inter() {
   setInterval(load_items, 2000);
+}
+
+function myAuctionsCreated() {
+  let chatMessagesDiv = document.getElementById("chat-messages");
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const auctions = JSON.parse(this.response);
+      chatMessagesDiv.innerHTML = ""; // Clear previous content
+      auctions.forEach((auction) => {
+        console.log(auction);
+        let auctionDiv = document.createElement("div");
+        auctionDiv.classList.add("auction");
+
+        let title = document.createElement("h3");
+        title.textContent = "Name: " + auction.item_name;
+
+        let description = document.createElement("p");
+        description.textContent = "Desc: " + auction.description;
+        // redir
+        let button = document.createElement("button");
+        button.textContent = "View Auction";
+        button.onclick = () => {
+          itemRedirct(auction.id);
+        };
+        // create the auction
+        auctionDiv.appendChild(title);
+        auctionDiv.appendChild(description);
+        auctionDiv.appendChild(button);
+        chatMessagesDiv.appendChild(auctionDiv);
+      });
+    } else if (this.readyState === 4) {
+      console.error("err", error);
+    }
+  };
+  request.open("GET", "/loadAuctionsCreated");
+  request.send();
 }
