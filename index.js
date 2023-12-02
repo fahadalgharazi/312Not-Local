@@ -11,8 +11,9 @@ const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 const multer = require("multer"); // image handling
 const fs = require("fs");
 const rateLimit = require("express-rate-limit");
+const { identity } = require("lodash");
 //port
-const port = 8000;
+const port = 8080;
 
 // middlewares
 const setHeaders = function (req, res, next) {
@@ -270,13 +271,13 @@ async function token_checker(token) {
 // }
 async function getAllItems() {
   const posts = await auctions.find({});
-  const jString = JSON.stringify(posts);
+  //const jString = JSON.stringify(posts);
   return posts;
 }
 
 async function getUserWonAuctions(user) {
   try {
-    const uAuc = await Auctions.find({ winner: user });
+    const uAuc = await Auctions.find({ finished: user });
     const jString = JSON.stringify(uAuc);
     return uAuc;
   } catch {
@@ -286,7 +287,7 @@ async function getUserWonAuctions(user) {
 
 async function getUserCreatedAuctions(user) {
   try {
-    const uAuc = await Auctions.find({ owner: user });
+    const uAuc = await Auctions.find({ seller: user });
     const jString = JSON.stringify(uAuc);
     return uAuc;
   } catch {
@@ -328,10 +329,9 @@ app.get("/loadAuctionsCreated", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = getUserCreatedAuctions(username);
-    aucts.then(function (result) {
-      res.json(result);
-    });
+    console.log(username);
+    aucts = await getUserCreatedAuctions(username);
+    res.send(JSON.stringify(aucts));
   } catch {
     res.send("User is guest");
   }
@@ -346,7 +346,7 @@ app.get("/loadAuctionsWon", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = getUserWonAuctions(username);
+    aucts = await getUserWonAuctions(username);
     aucts.then(function (result) {
       res.json(result);
     });
@@ -532,10 +532,12 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     });
   });
   const username = req.cookies.username;
+  const end_time = req.body.auction_end_time;
+  let date = new Date(end_time);
+  let creation_date = date.getTime();
   if (!username) {
     return res.status(400).send("Not logged in!");
   }
-
   if (
     !req.body.item_title ||
     !req.body.starting_price ||
@@ -543,9 +545,11 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   ) {
     return res.status(400).send("All fields must be filled!");
   }
-
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
+  }
+  if (creation_date < Date.now()) {
+    return res.status(400).send("Enter a valid date!");
   }
   console.log("auction end time", req.body.auction_end_time);
   let converted_length = new Date(req.body.auction_end_time).getTime();
@@ -558,7 +562,9 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     req.file.filename,
     converted_length
   );
-  res.status(200).send(id);
+  console.log("ID", id);
+  let url = req.protocol + "://" + req.get("host") + "/auction-page?id=" + id;
+  res.status(200).redirect(url);
 });
 
 //items page
