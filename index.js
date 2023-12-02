@@ -286,7 +286,8 @@ async function getUserWonAuctions(user) {
 
 async function getUserCreatedAuctions(user) {
   try {
-    const uAuc = await Auctions.find({ seller: user });
+    const uAuc = await Auctions.find({ owner: user });
+    const jString = JSON.stringify(uAuc);
     return uAuc;
   } catch {
     console.log("No auctions yet");
@@ -327,8 +328,10 @@ app.get("/loadAuctionsCreated", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = await getUserCreatedAuctions(username);
-    res.send(aucts);
+    aucts = getUserCreatedAuctions(username);
+    aucts.then(function (result) {
+      res.json(result);
+    });
   } catch {
     res.send("User is guest");
   }
@@ -555,7 +558,7 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     req.file.filename,
     converted_length
   );
-  res.status(200).redirect("http://localhost:8080/auction-page?id=" + id);
+  res.status(200).send(id);
 });
 
 //items page
