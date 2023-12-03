@@ -277,18 +277,27 @@ async function getAllItems() {
 
 async function getUserWonAuctions(user) {
   try {
-    const uAuc = await Auctions.find({ finished: user });
-    const jString = JSON.stringify(uAuc);
-    return uAuc;
-  } catch {
-    console.log("No auctions yet");
+    let auctions = await getUserCreatedAuctions(user);
+    let won = [];
+    for (let auction of auctions) {
+      console.log("Curr auctio", auction);
+      console.log("Creation date", new Date(auction["creation_date"]));
+      console.log("Won length", auction["length"]);
+      let converted_length =
+        new Date(auction["creation_date"]).getTime() + auction["length"];
+      if (converted_length < Date.now()) {
+        won.push(auction);
+      }
+    }
+    return won;
+  } catch (error) {
+    console.log("Error", error);
   }
 }
 
 async function getUserCreatedAuctions(user) {
   try {
     const uAuc = await Auctions.find({ seller: user });
-    const jString = JSON.stringify(uAuc);
     return uAuc;
   } catch {
     console.log("No auctions yet");
@@ -330,7 +339,7 @@ app.get("/loadAuctionsCreated", async (req, res) => {
     username = req.cookies["username"];
     username = escapeHTML(username);
     console.log(username);
-    aucts = await getUserCreatedAuctions(username);
+    let aucts = await getUserCreatedAuctions(username);
     res.send(JSON.stringify(aucts));
   } catch {
     res.send("User is guest");
@@ -346,10 +355,9 @@ app.get("/loadAuctionsWon", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = await getUserWonAuctions(username);
-    aucts.then(function (result) {
-      res.json(result);
-    });
+    let aucts = await getUserWonAuctions(username);
+    console.log("Aucts from won auctions", aucts);
+    res.send(JSON.stringify(aucts));
   } catch {
     res.send("user is guest");
   }
@@ -532,9 +540,10 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     });
   });
   const username = req.cookies.username;
-  const end_time = req.body.auction_end_time;
+  const end_time = req.body.auction_end_time; // 8 hours
+  console.log(end_time);
   let date = new Date(end_time);
-  let creation_date = date.getTime();
+  let auction_end = date.getTime() + 21600000 - 3563686;
   if (!username) {
     return res.status(400).send("Not logged in!");
   }
@@ -548,12 +557,14 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
   }
-  if (creation_date < Date.now()) {
+  //let fiveHoursFromNow = Date.now() + 5 * 60 * 60 * 1000;
+  if (auction_end < Date.now()) {
+    console.log("Creation date of auction", auction_end);
+    console.log("CUrrent date", Date.now());
     return res.status(400).send("Enter a valid date!");
   }
   console.log("auction end time", req.body.auction_end_time);
-  let converted_length = new Date(req.body.auction_end_time).getTime();
-  console.log(converted_length);
+  let converted_length = auction_end - Date.now(); // endtime - curr = length
   let id = await add_new_auction(
     username,
     req.body.item_title,
@@ -562,7 +573,6 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     req.file.filename,
     converted_length
   );
-  console.log("ID", id);
   let url = req.protocol + "://" + req.get("host") + "/auction-page?id=" + id;
   res.status(200).redirect(url);
 });

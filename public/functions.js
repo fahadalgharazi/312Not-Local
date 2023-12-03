@@ -84,10 +84,9 @@ async function display_auction() {
       owner.innerText += "Seller: " + auction_data["seller"];
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
-      // creation_date = new Date(auction_data["creation_date"]).getTime();
-      let auction_end_time =
-        new Date(auction_data["length"]).getTime() + 18040000;
-      // let auction_end_time = Date.now() + 3600000; //dummy data
+      creation_date = new Date(auction_data["creation_date"]).getTime();
+      let length = new Date(auction_data["length"]).getTime();
+      let auction_end_time = creation_date + length;
       console.log("AUCTION END TIME", auction_end_time);
       if (auction_end_time > 0) {
         init_countdown(auction_end_time);
@@ -116,13 +115,13 @@ function init_countdown(expiration) {
     convertedTime["seconds"] +
     " seconds.";
   document.getElementById("time_left").innerText = text;
-  setInterval(() => countdown(expiration), 1000);
+  setInterval(() => countdown(expiration - Date.now()), 1000);
 }
 
 function countdown(expiration) {
   // for specific auction page only, if you want to copy this logic, remove final
   // let countdown = document.getElementById("time_left").innerText.split(" ");
-  let timeLeft = expiration - Date.now();
+  let timeLeft = expiration;
 
   if (timeLeft < 0) {
     document.getElementById("time_left").innerText = "";
@@ -131,12 +130,6 @@ function countdown(expiration) {
   }
 
   console.log("TIMELEFT IN COUNTDOWN", timeLeft);
-
-  if (timeLeft < 0) {
-    document.getElementById("time_left").innerText = "";
-    document.getElementById("time_left_prompt").innerText = "Auction over!";
-    return;
-  }
 
   let convertedTime = convertMS(timeLeft);
   let text =
@@ -344,6 +337,7 @@ async function put_listings(won) {
     if (!response.ok) {
       throw new Error("Error with server.");
     }
+    console.log("RESP JSON", response.json());
     listings = await response.json();
     console.log("data", listings);
   } catch (error) {
