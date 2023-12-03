@@ -37,8 +37,6 @@ function redirectMyAuctionsWon() {
   window.location.href = "/auctionsWon"; // Replace with your desired URL
 }
 
-updateAuctions();
-
 function display_username() {
   const display = document.getElementById("display_name");
   let username = cookie_fetch("username");
@@ -86,10 +84,9 @@ async function display_auction() {
       owner.innerText += "Seller: " + auction_data["seller"];
       creation_date.innerText += " " + auction_data["creation_date"];
       price.innerText += " $" + amount + ", " + bidder;
-      // creation_date = new Date(auction_data["creation_date"]).getTime();
-      let auction_end_time =
-        new Date(auction_data["length"]).getTime() + 18040000; // adds 5 hrs
-      // let auction_end_time = Date.now() + 3600000; //dummy data
+      creation_date = new Date(auction_data["creation_date"]).getTime();
+      let length = new Date(auction_data["length"]).getTime();
+      let auction_end_time = creation_date + length;
       console.log("AUCTION END TIME", auction_end_time);
       if (auction_end_time > 0) {
         init_countdown(auction_end_time);
@@ -118,13 +115,13 @@ function init_countdown(expiration) {
     convertedTime["seconds"] +
     " seconds.";
   document.getElementById("time_left").innerText = text;
-  setInterval(() => countdown(expiration), 1000);
+  setInterval(() => countdown(expiration - Date.now()), 1000);
 }
 
 function countdown(expiration) {
   // for specific auction page only, if you want to copy this logic, remove final
   // let countdown = document.getElementById("time_left").innerText.split(" ");
-  let timeLeft = expiration - Date.now();
+  let timeLeft = expiration;
 
   if (timeLeft < 0) {
     document.getElementById("time_left").innerText = "";
@@ -133,6 +130,7 @@ function countdown(expiration) {
   }
 
   console.log("TIMELEFT IN COUNTDOWN", timeLeft);
+
   let convertedTime = convertMS(timeLeft);
   let text =
     convertedTime["days"] +
@@ -206,6 +204,7 @@ async function send_data_and_update() {
       document.getElementById("input2").innerText = "";
       document.getElementById("error_form").innerText =
         "Successfully bid $" + bid + "!";
+      location.reload();
     } else if (request.readyState === 4) {
       // Handle response here (error)
       console.error(request.statusText);
@@ -253,35 +252,36 @@ function itemRedirct(id) {
   window.location.href = "/auction-page?id=" + id; // Replace with your desired URL
 }
 
-const form = document.getElementById("form");
-form.addEventListener("submit", (event) => {
-  event.preventDefault(); // prevents default submission
-  let form = document.getElementById("auctionForm");
-  let formData = new FormData(form);
+// const form = document.getElementById("form");
+// form.addEventListener("submit", (event) => {
+//   event.preventDefault(); // prevents default submission
+//   let form = document.getElementById("auctionForm");
+//   let formData = new FormData(form);
+//   console.log("FORM");
+//   const request = new XMLHttpRequest();
+//   request.onreadystatechange = function () {
+//     if (request.readyState === 4) {
+//       console.log(request.responseText);
+//       if (request.status === 200) {
+//         console.log("Redirecting");
+//         console.log("RESP", request.responseText);
+//         setTimeout(null, 1000);
+//         itemRedirct(request.responseText);
+//       } else {
+//         console.log("error with creating auction.");
+//       }
+//     }
+//   };
 
-  const request = new XMLHttpRequest();
-  request.onreadystatechange = function () {
-    if (request.readyState === 4) {
-      console.log(request.responseText);
-      if (request.status === 200) {
-        // setTimeout(null, 1000);
-        console.log("submitted new auction!");
-        // itemRedirct(request.responseText);
-      } else {
-        console.log("error with creating auction.");
-      }
-    }
-  };
-
-  request.open("POST", "/submit-auction");
-  request.send(formData); // Send the FormData object
-});
+//   request.open("POST", "/submit-auction");
+//   request.send(formData); // Send the FormData object
+// });
 
 function inter() {
   setInterval(load_items, 2000);
 }
 
-function myAuctionsCreated() {
+async function myAuctions() {
   let chatMessagesDiv = document.getElementById("chat-messages");
   const request = new XMLHttpRequest();
   request.onreadystatechange = function () {
@@ -316,4 +316,64 @@ function myAuctionsCreated() {
   };
   request.open("GET", "/loadAuctionsCreated");
   request.send();
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.location.pathname == "/auctionsCreated") {
+    await put_listings(false);
+  } else if (window.location.pathname == "/auctionsWon") {
+    await put_listings(true);
+  }
+});
+
+async function put_listings(won) {
+  let listings;
+  document.getElementById("paragraph").innerText +=
+    " " + cookie_fetch("username");
+  try {
+    const response = await fetch(
+      won ? "/loadAuctionsWon" : "/loadAuctionsCreated"
+    );
+    if (!response.ok) {
+      throw new Error("Error with server.");
+    }
+    console.log("RESP JSON", response.json());
+    listings = await response.json();
+    console.log("data", listings);
+  } catch (error) {
+    console.log("ERROR", error);
+    return;
+  }
+
+  console.log("listings", listings);
+  await listing_loop(listings);
+}
+
+async function listing_loop(listings) {
+  let id = 1;
+  let listings_html = document.getElementById("listings");
+  for (let [key, value] in Object.entries(listings)) {
+    console.log("key", key);
+    console.log("value", value);
+    let item = listings[key];
+    let div = document.createElement("div");
+    div.id = "item-" + id;
+    let item_name = item["item_name"];
+    console.log(item_name);
+    let desc = item["description"];
+    console.log(desc);
+    let item_id = item["id"];
+
+    div.innerHTML = `Item name: ${item_name}</br>Desc: ${desc} `;
+
+    let button = document.createElement("button");
+    button.innerHTML = "To Auction";
+    button.onclick = async () => {
+      var host = window.location.protocol + "//" + window.location.host;
+      window.location.href = host + "/auction-page?id=" + item_id;
+    };
+    div.appendChild(button);
+    listings_html.appendChild(div);
+    id += 1;
+  }
 }

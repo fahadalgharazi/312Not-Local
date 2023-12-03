@@ -10,10 +10,76 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 const multer = require("multer"); // image handling
 const fs = require("fs");
-
+const rateLimit = require("express-rate-limit");
+const { identity } = require("lodash");
 //port
 const port = 8080;
 
+// middlewares
+const setHeaders = function (req, res, next) {
+  const filePath = path.join(__dirname, "public", req.path);
+  const mimeType = mime.lookup(filePath);
+  if (mimeType) {
+    res.type(mimeType);
+  }
+  res.set("X-Content-Type-Options", "nosniff");
+  next();
+};
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/images/"); // no callback
+  },
+  filename: function (req, file, cb) {
+    const originalNameWithoutExt = path.basename(
+      file.originalname,
+      path.extname(file.originalname).replace("/", "")
+    );
+
+    cb(
+      null,
+      originalNameWithoutExt + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const img_save = multer({ storage: storage }); // multer init
+const limited_users = {};
+const limiter = rateLimit({
+  windowMs: 10000, // 10 seconds
+  max: 50, // Limit each IP to 50 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next) => {
+    const now = Date.now();
+    limited_users[req.ip] = now + 30000; // Block for 30 sec
+    res
+      .status(429)
+      .send("429 Too many requests! You are blocked for 30 seconds.");
+  },
+});
+
+// check if the user is blocked
+app.use((req, res, next) => {
+  const blockTime = limited_users[req.ip];
+  if (Date.now() < blockTime) {
+    return res
+      .status(429)
+      .send(
+        `429 Too Many Requests! \n Blocked. Try again in ${
+          (blockTime - Date.now()) / 1000
+        } seconds`
+      );
+  }
+  next();
+});
+
+app.use(setHeaders);
+app.use(cookieParser());
+app.use("/public", express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(limiter);
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
 // useUnifiedTopology: use new topology engine
@@ -58,6 +124,7 @@ const auction_schema = new Schema({
   winner: String,
   length: Number,
   id: String,
+  finished: Boolean,
 });
 // creates a model, which is basically db["users"]
 const User = mongo.model("users", user_schema);
@@ -99,6 +166,7 @@ async function add_new_auction(
       length: length,
       id: Math.random().toString(36).substring(2, 15), // random id
       price_history: { [Date.now()]: [seller, start_price] },
+      finished: false,
     });
 
     await new_auction.save();
@@ -203,17 +271,27 @@ async function token_checker(token) {
 // }
 async function getAllItems() {
   const posts = await auctions.find({});
-  const jString = JSON.stringify(posts);
+  //const jString = JSON.stringify(posts);
   return posts;
 }
 
 async function getUserWonAuctions(user) {
   try {
-    const uAuc = await Auctions.find({ winner: user });
-    const jString = JSON.stringify(uAuc);
-    return uAuc;
-  } catch {
-    console.log("No auctions yet");
+    let auctions = await getUserCreatedAuctions(user);
+    let won = [];
+    for (let auction of auctions) {
+      console.log("Curr auctio", auction);
+      console.log("Creation date", new Date(auction["creation_date"]));
+      console.log("Won length", auction["length"]);
+      let converted_length =
+        new Date(auction["creation_date"]).getTime() + auction["length"];
+      if (converted_length < Date.now()) {
+        won.push(auction);
+      }
+    }
+    return won;
+  } catch (error) {
+    console.log("Error", error);
   }
 }
 
@@ -225,42 +303,6 @@ async function getUserCreatedAuctions(user) {
     console.log("No auctions yet");
   }
 }
-
-// middlewares
-const setHeaders = function (req, res, next) {
-  const filePath = path.join(__dirname, "public", req.path);
-  const mimeType = mime.lookup(filePath);
-  if (mimeType) {
-    res.type(mimeType);
-  }
-  res.set("X-Content-Type-Options", "nosniff");
-  next();
-};
-app.use(setHeaders);
-app.use(cookieParser());
-app.use("/public", express.static("public"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/images/"); // no callback
-  },
-  filename: function (req, file, cb) {
-    const originalNameWithoutExt = path.basename(
-      file.originalname,
-      path.extname(file.originalname)
-    );
-
-    cb(
-      null,
-      originalNameWithoutExt + Date.now() + path.extname(file.originalname)
-    );
-  },
-});
-
-const img_save = multer({ storage: storage }); // multer init
 
 // http requests
 
@@ -296,8 +338,9 @@ app.get("/loadAuctionsCreated", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = await getUserCreatedAuctions(username);
-    res.send(aucts);
+    console.log(username);
+    let aucts = await getUserCreatedAuctions(username);
+    res.send(JSON.stringify(aucts));
   } catch {
     res.send("User is guest");
   }
@@ -312,10 +355,9 @@ app.get("/loadAuctionsWon", async (req, res) => {
   try {
     username = req.cookies["username"];
     username = escapeHTML(username);
-    aucts = getUserWonAuctions(username);
-    aucts.then(function (result) {
-      res.json(result);
-    });
+    let aucts = await getUserWonAuctions(username);
+    console.log("Aucts from won auctions", aucts);
+    res.send(JSON.stringify(aucts));
   } catch {
     res.send("user is guest");
   }
@@ -358,7 +400,7 @@ app.get("/get-auction-data", async (req, res) => {
 });
 
 app.get("/items", async (req, res) => {
-  const items = await Auctions.find();
+  const items = await Auctions.find({ finished: false });
   console.log(items);
   res.send(JSON.stringify(items));
 });
@@ -498,10 +540,13 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     });
   });
   const username = req.cookies.username;
+  const end_time = req.body.auction_end_time; // 8 hours
+  console.log(end_time);
+  let date = new Date(end_time);
+  let auction_end = date.getTime() + 21600000 - 3563686;
   if (!username) {
     return res.status(400).send("Not logged in!");
   }
-
   if (
     !req.body.item_title ||
     !req.body.starting_price ||
@@ -509,13 +554,17 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
   ) {
     return res.status(400).send("All fields must be filled!");
   }
-
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
   }
+  //let fiveHoursFromNow = Date.now() + 5 * 60 * 60 * 1000;
+  if (auction_end < Date.now()) {
+    console.log("Creation date of auction", auction_end);
+    console.log("CUrrent date", Date.now());
+    return res.status(400).send("Enter a valid date!");
+  }
   console.log("auction end time", req.body.auction_end_time);
-  let converted_length = new Date(req.body.auction_end_time).getTime();
-  console.log(converted_length);
+  let converted_length = auction_end - Date.now(); // endtime - curr = length
   let id = await add_new_auction(
     username,
     req.body.item_title,
@@ -524,7 +573,8 @@ app.post("/submit-auction", img_save.single("item_image"), async (req, res) => {
     req.file.filename,
     converted_length
   );
-  res.status(200).redirect("http://localhost:8080/auction-page?id=" + id);
+  let url = req.protocol + "://" + req.get("host") + "/auction-page?id=" + id;
+  res.status(200).redirect(url);
 });
 
 //items page

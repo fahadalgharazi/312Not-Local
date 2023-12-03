@@ -3,23 +3,21 @@
     <title>CSE312 Group Project</title>
     <link rel="stylesheet" type="text/css" href="/public/auctionsWon.css" />
   </head>
-
-  <body onload="myAuctionsCreated();">
+  <form action="http://localhost:8080">
+    <button id="back_button" type="submit">Back to homepage!</button>
+  </form>
+  <body>
     <div class="title">
-      <h2>Auction House: User Page</h2>
+      <h2>My currently running auctions! 🤩</h2>
     </div>
 
     <div class="header">
       <div class="image_div">
-        <img
-          src="public/image/CSE312TWITTER.png"
-          alt="It's CSE312 Twitter"
-          class="my_image"
-        />
+        
       </div>
       <div id="display_name">
         <p id="paragraph">
-          My Created Auctions!<br />Currently logged in to:
+        <br />Currently logged in to:
         </p>
       </div>
       <div class="my-auctionsWon">
@@ -31,17 +29,9 @@
       <div class="chat">
         <div id="chat-messages"></div>
 
-        <div class="chat-form">
+        <div id="listings">
           <hr/>
-          <label>
-            Title:
-            <input id="title-text-box" type="text"/>
-          </label>
-          <label>
-            Description:
-            <!-- <input id="description-text-box" row="4" cols="50" required type="text"/> -->
-            <textarea id="description-text-box" row="4" cols="50" required></textarea>
-          </label>
+          
         </div>
       </div>
       </div>
