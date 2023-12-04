@@ -470,11 +470,14 @@ app.post("/register", async (req, res) => {
     if (user_document) {
       return res.status(400).send("Username already exists!"); // if user exists, throw this err
     }
+    regEm = 
     await add_new_user(name, password); // idk if await should be there
-    if (sendEmail(email,password,name) == 0) {
-      res.status(400).send('Email already registered')}
-    else if (sendEmail(email,password,name) == 1){
-      res.send('Registration successful. Check your email for verification instructions.');}
+    sendEmail(email,password,name)
+    // if (sendEmail(email,password,name) == 0) {
+    //   res.status(400).send('Email already registered')}
+    // else if (sendEmail(email,password,name) == 1){
+    res.send('Registration successful. Check your email for verification instructions.');
+    // }
   } catch (error) {
     console.error("Error occurred:", error); // log error for debugging
     res.status(500).send("A server error has occurred: " + String(error));
