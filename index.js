@@ -521,7 +521,8 @@ app.get('/verify', (req, res) => {
   // Find the user with the corresponding verification token
   const user = registeredUsers.find(u => u.verificationToken === token);
   if (!user) {
-    return res.status(400).send('Invalid or expired verification token');
+    // return res.status(400).send('Invalid or expired verification token');
+    return res.send('Not verified');
   }
   try {
     emailVer(user.username)
@@ -538,6 +539,11 @@ app.get('/verify', (req, res) => {
     console.log("big error")
   }
 });
+// app.get("/verificationStat", async (req, res) => {
+//   console.log(items);
+
+//   res.send(JSON.stringify(items));
+// });
 
 app.post("/make-post", bodyParser.json(), (req, res) => {
   console.log(req.body["title"]);

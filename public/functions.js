@@ -1,3 +1,5 @@
+const { verify } = require("jsonwebtoken");
+
 function cookie_fetch(name) {
   let cookies = document.cookie.split("; "); // doc cookie returns {cookiename=cookie; cookiename2=cookie2; ...}
   for (let cookie of cookies) {
@@ -161,6 +163,7 @@ function convertMS(ms) {
 }
 
 function welcome() {
+  verification()
   console.log("HELLO");
 }
 
@@ -247,7 +250,19 @@ function load_items() {
   request.open("GET", "/items");
   request.send();
 }
+function verification() {
+  let veri = document.getElementById("Verification");
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const ver = this.response;
+      veri.innerHTML = ""+ver;
 
+    }
+  };
+  request.open("GET", "/verify");
+  request.send();
+}
 function itemRedirct(id) {
   window.location.href = "/auction-page?id=" + id; // Replace with your desired URL
 }
