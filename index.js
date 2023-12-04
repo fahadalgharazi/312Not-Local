@@ -10,7 +10,9 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken"); // auth tokens: https://jwt.io/introduction
 const multer = require("multer"); // image handling
 const fs = require("fs");
-
+const process = require('process');
+const nodemailer = require('nodemailer');
+const uuid = require('uuid');
 //port
 const port = 8080;
 
@@ -33,6 +35,7 @@ const user_schema = new Schema({
   },
   email: String,
   password: String,
+  verfied: Boolean, 
 });
 
 const auth_schema = new Schema({
@@ -141,6 +144,7 @@ async function add_new_user(username, password) {
     name: esc_user,
     //email: email,
     password: password,
+    verfied: false,
   });
   // hash pw
   new_user.password = await bcrypt.hash(password, 10);
@@ -153,6 +157,16 @@ async function add_new_user(username, password) {
   console.log("Registering: ", esc_user);
 }
 
+async function emailVer(username) {
+  await User.findOneAndUpdate(
+    { name: username },
+    {
+      $set: {
+        verified: true,
+      },
+    }
+  );
+}
 async function verify_user(username, password) {
   const esc_user = escapeHTML(username);
   try {
@@ -224,6 +238,41 @@ async function getUserCreatedAuctions(user) {
   } catch {
     console.log("No auctions yet");
   }
+}
+// const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+// Set up Nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'notlocal312@gmail.com', // Your Gmail address
+    pass: "gtjn rbdc opok glho",
+  },
+});
+const registeredUsers = [];
+async function sendEmail(email, password, username) {
+  console.log(email)
+  // Check if the email is already registered
+  if (registeredUsers.find(user => user.email === email)) {
+    return 0;
+  }
+
+  // Generate a unique verification token
+  const verificationToken = uuid.v4();
+
+  // Save the user data and verification token
+  registeredUsers.push({ username, email, password, verificationToken });
+
+  // Send a verification email
+  const verificationLink = `https://notlocal.live/verify?token=${verificationToken}`;
+
+  transporter.sendMail({
+    from: 'notlocal312@gmail.com',
+    to: email,
+    subject: 'Email Verification',
+    text: `Click on the following link to verify your email: ${verificationLink}`,
+  });
+  return 1;
+
 }
 
 // middlewares
@@ -367,6 +416,8 @@ app.get("/items", async (req, res) => {
 app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
   const password = req.body.password_reg;
+  var email = req.body.email_reg;
+  email = escapeHTML(email)
   if (!name || !password) {
     return res.status(400).send("All fields are required!");
   }
@@ -377,7 +428,10 @@ app.post("/register", async (req, res) => {
       return res.status(400).send("Username already exists!"); // if user exists, throw this err
     }
     await add_new_user(name, password); // idk if await should be there
-    res.send("User registered successfully!");
+    if (sendEmail(email,password,name) == 0) {
+      res.status(400).send('Email already registered')}
+    else if (sendEmail(email,password,name) == 1){
+      res.send('Registration successful. Check your email for verification instructions.');}
   } catch (error) {
     console.error("Error occurred:", error); // log error for debugging
     res.status(500).send("A server error has occurred: " + String(error));
@@ -407,6 +461,27 @@ app.post("/login", async (req, res) => {
       .send("Login successful!\n" + "Logged in: " + user_login);
   } else {
     res.status(401).send(user_verification);
+  }
+});
+
+// Define a route for email verification
+app.get('/verify', (req, res) => {
+  const { token } = req.query;
+
+  // Find the user with the corresponding verification token
+  const user = registeredUsers.find(u => u.verificationToken === token);
+  if (!user) {
+    return res.status(400).send('Invalid or expired verification token');
+  }
+  try {
+    emailVer(user.username)
+    console.log(`Email verified for user: ${user.email}`);
+    // Remove the verification token from the user data
+    user.verificationToken = null;
+    res.send('Email verified successfully');
+  }
+  catch{
+    console.log("big error")
   }
 });
 
