@@ -473,6 +473,10 @@ app.post("/register", async (req, res) => {
     regEm = 
     await add_new_user(name, password); // idk if await should be there
     sendEmail(email,password,name)
+    res.cookie("verified", "Not Verified", {
+      maxAge: 3600000, // one hour in milliseconds
+      sameSite: "strict",
+    })
     // if (sendEmail(email,password,name) == 0) {
     //   res.status(400).send('Email already registered')}
     // else if (sendEmail(email,password,name) == 1){
@@ -524,6 +528,10 @@ app.get('/verify', (req, res) => {
     console.log(`Email verified for user: ${user.email}`);
     // Remove the verification token from the user data
     user.verificationToken = null;
+    res.cookie("verified", "Verified User", {
+      maxAge: 36000000000000000000000, // one hour in milliseconds
+      sameSite: "strict",
+    })
     res.send('Email verified successfully');
   }
   catch{
