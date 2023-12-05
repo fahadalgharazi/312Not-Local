@@ -351,7 +351,6 @@ async function put_listings(won) {
     if (!response.ok) {
       throw new Error("Error with server.");
     }
-    console.log("RESP JSON", response.json());
     listings = await response.json();
     console.log("data", listings);
   } catch (error) {
