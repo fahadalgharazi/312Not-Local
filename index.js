@@ -45,7 +45,10 @@ const storage = multer.diskStorage({
   },
 });
 
-const img_save = multer({ storage: storage }); // multer init
+const img_save = multer(
+  { storage: storage },
+  { limits: { fileSize: 2 * 1024 * 1024 } }
+); // multer init
 const limited_users = {};
 const limiter = rateLimit({
   windowMs: 10000, // 10 seconds
@@ -83,7 +86,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(limiter);
-app.use(express.bodyParser({ limit: "50mb" }));
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
 // useUnifiedTopology: use new topology engine
