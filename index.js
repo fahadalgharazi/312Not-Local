@@ -12,9 +12,9 @@ const multer = require("multer"); // image handling
 const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const { identity } = require("lodash");
-const process = require('process');
-const nodemailer = require('nodemailer');
-const uuid = require('uuid');
+const process = require("process");
+const nodemailer = require("nodemailer");
+const uuid = require("uuid");
 //port
 const port = 8080;
 
@@ -83,6 +83,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(limiter);
+app.use(express.bodyParser({ limit: "50mb" }));
 // connect to mongo
 // useNewUrlParser: uses newer parser instead of legacy one
 // useUnifiedTopology: use new topology engine
@@ -102,7 +103,7 @@ const user_schema = new Schema({
   },
   email: String,
   password: String,
-  verfied: Boolean, 
+  verfied: Boolean,
 });
 
 const auth_schema = new Schema({
@@ -321,17 +322,17 @@ async function getUserCreatedAuctions(user) {
 // const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 // Set up Nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: 'notlocal312@gmail.com', // Your Gmail address
+    user: "notlocal312@gmail.com", // Your Gmail address
     pass: "gtjn rbdc opok glho",
   },
 });
 const registeredUsers = [];
 async function sendEmail(email, password, username) {
-  console.log(email)
+  console.log(email);
   // Check if the email is already registered
-  if (registeredUsers.find(user => user.email === email)) {
+  if (registeredUsers.find((user) => user.email === email)) {
     return 0;
   }
 
@@ -345,13 +346,12 @@ async function sendEmail(email, password, username) {
   const verificationLink = `https://notlocal.live/verify?token=${verificationToken}`;
 
   transporter.sendMail({
-    from: 'notlocal312@gmail.com',
+    from: "notlocal312@gmail.com",
     to: email,
-    subject: 'Email Verification',
+    subject: "Email Verification",
     text: `Click on the following link to verify your email: ${verificationLink}`,
   });
   return 1;
-
 }
 
 // http requests
@@ -460,7 +460,7 @@ app.post("/register", async (req, res) => {
   const name = req.body.username_reg;
   const password = req.body.password_reg;
   var email = req.body.email_reg;
-  email = escapeHTML(email)
+  email = escapeHTML(email);
   if (!name || !password) {
     return res.status(400).send("All fields are required!");
   }
@@ -470,17 +470,18 @@ app.post("/register", async (req, res) => {
     if (user_document) {
       return res.status(400).send("Username already exists!"); // if user exists, throw this err
     }
-    regEm = 
-    await add_new_user(name, password); // idk if await should be there
-    sendEmail(email,password,name)
+    regEm = await add_new_user(name, password); // idk if await should be there
+    sendEmail(email, password, name);
     res.cookie("verified", "Not Verified", {
       maxAge: 3600000, // one hour in milliseconds
       sameSite: "strict",
-    })
+    });
     // if (sendEmail(email,password,name) == 0) {
     //   res.status(400).send('Email already registered')}
     // else if (sendEmail(email,password,name) == 1){
-    res.send('Registration successful. Check your email for verification instructions.');
+    res.send(
+      "Registration successful. Check your email for verification instructions."
+    );
     // }
   } catch (error) {
     console.error("Error occurred:", error); // log error for debugging
@@ -515,28 +516,27 @@ app.post("/login", async (req, res) => {
 });
 
 // Define a route for email verification
-app.get('/verify', (req, res) => {
+app.get("/verify", (req, res) => {
   const { token } = req.query;
 
   // Find the user with the corresponding verification token
-  const user = registeredUsers.find(u => u.verificationToken === token);
+  const user = registeredUsers.find((u) => u.verificationToken === token);
   if (!user) {
     // return res.status(400).send('Invalid or expired verification token');
-    return res.send('Not verified');
+    return res.send("Not verified");
   }
   try {
-    emailVer(user.username)
+    emailVer(user.username);
     console.log(`Email verified for user: ${user.email}`);
     // Remove the verification token from the user data
     user.verificationToken = null;
     res.cookie("verified", "Verified User", {
       maxAge: 36000000000000000000000, // one hour in milliseconds
       sameSite: "strict",
-    })
-    res.send('Email verified successfully');
-  }
-  catch{
-    console.log("big error")
+    });
+    res.send("Email verified successfully");
+  } catch {
+    console.log("big error");
   }
 });
 // app.get("/verificationStat", async (req, res) => {
