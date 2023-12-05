@@ -25,7 +25,7 @@ body {
 
 .user-list {
   width: 20%;
-  background-color: lightgreen;
+  background-color: white;
   padding: 20px;
   color: black;
 }
@@ -60,7 +60,7 @@ body {
   width: 70%;
   /*background-color: aqua;*/
   /*padding: 20px;*/
-  background-color: lightcyan;
+  background-color: white;
   color: black;
   overflow: scroll;
   display: flex;

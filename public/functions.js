@@ -208,9 +208,10 @@ async function send_data_and_update() {
       document.getElementById("error_form").innerText =
         "Successfully bid $" + bid + "!";
       location.reload();
-    } else if (request.readyState === 4 || request.status !== 200) {
+    } else if (request.readyState === 4) {
       // Handle response here (error)
       console.error(request.statusText);
+    } else if (request.status === 409) {
       document.getElementById("error_form").innerText =
         "Error has occured trying to bid. Please refresh your page!";
     }
