@@ -1,4 +1,4 @@
-const { verify } = require("jsonwebtoken");
+// const { verify } = require("jsonwebtoken");
 
 function cookie_fetch(name) {
   let cookies = document.cookie.split("; "); // doc cookie returns {cookiename=cookie; cookiename2=cookie2; ...}
@@ -163,7 +163,7 @@ function convertMS(ms) {
 }
 
 function welcome() {
-  verification()
+  verification();
   console.log("HELLO");
 }
 
@@ -256,8 +256,7 @@ function verification() {
   request.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
       const ver = this.response;
-      veri.innerHTML = ""+ver;
-
+      veri.innerHTML = "" + ver;
     }
   };
   request.open("GET", "/verify");
