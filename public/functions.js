@@ -208,9 +208,11 @@ async function send_data_and_update() {
       document.getElementById("error_form").innerText =
         "Successfully bid $" + bid + "!";
       location.reload();
-    } else if (request.readyState === 4) {
+    } else if (request.readyState === 4 || request.status !== 200) {
       // Handle response here (error)
       console.error(request.statusText);
+      document.getElementById("error_form").innerText =
+        "Error has occured trying to bid. Please refresh your page!";
     }
   };
   request.send(JSON.stringify(data));
@@ -352,13 +354,11 @@ async function put_listings(won) {
       throw new Error("Error with server.");
     }
     listings = await response.json();
-    console.log("data", listings);
   } catch (error) {
     console.log("ERROR", error);
     return;
   }
 
-  console.log("listings", listings);
   await listing_loop(listings);
 }
 

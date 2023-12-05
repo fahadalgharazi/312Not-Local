@@ -614,6 +614,14 @@ app.post("/new-bid", async (req, res) => {
   let user = req_body["user"];
   let bid = req_body["bid"];
   let id = req_body["id"];
+
+  const auc_from_id = await Auctions.findOne({ id: id });
+  let db_bid = auc_from_id["current_bid"][1];
+
+  if (bid < db_bid) {
+    res.status(409).send();
+  }
+
   await update_bid(user, bid, id);
   res.status(200).send();
 });
