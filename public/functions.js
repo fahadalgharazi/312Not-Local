@@ -214,6 +214,7 @@ async function send_data_and_update() {
     } else if (request.status === 409) {
       document.getElementById("error_form").innerText =
         "Error has occured trying to bid. Please refresh your page!";
+      location.reload();
     }
   };
   request.send(JSON.stringify(data));
