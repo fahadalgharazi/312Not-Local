@@ -45,10 +45,11 @@ const storage = multer.diskStorage({
   },
 });
 
-const img_save = multer(
-  { storage: storage },
-  { limits: { fileSize: 2 * 1024 * 1024 } }
-); // multer init
+const img_save = multer({
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // Limit of 2MB
+});
+
 const limited_users = {};
 const limiter = rateLimit({
   windowMs: 10000, // 10 seconds
